@@ -578,7 +578,7 @@ Sent via INTMOVE Global Consultation Onboarding System`;
       {/* Consultation Glassmorphic Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 overflow-y-auto bg-black/70 backdrop-blur-lg">
+          <div className="fixed inset-0 z-50 flex items-start justify-center p-0 md:p-4 py-8 md:py-16 overflow-y-auto bg-black/70 backdrop-blur-lg">
             {/* Backdrop Overlay */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -598,7 +598,7 @@ Sent via INTMOVE Global Consultation Onboarding System`;
             >
               
               {/* Form Side */}
-              <div className="flex-1 p-6 md:p-8 flex flex-col justify-between overflow-y-auto max-h-[85vh] lg:max-h-[90vh]">
+              <div className="flex-1 p-6 md:p-8 flex flex-col justify-between">
                 
                 {/* Form Header */}
                 <div className="flex justify-between items-center mb-6">

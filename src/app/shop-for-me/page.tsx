@@ -8,7 +8,7 @@ import {
   ShoppingBag, Package, Smartphone, Car, Shirt, 
   Coffee, Gift, Heart, Star, Search, ShieldCheck, 
   Globe, Truck, ChevronDown, ArrowRight, MessageCircle, 
-  UploadCloud, Compass, CreditCard, Building2, MapPin
+  UploadCloud, Compass, CreditCard, Building2, MapPin, Mail
 } from "lucide-react";
 
 // --- Data Structures ---
@@ -113,19 +113,31 @@ export default function ShopForMePage() {
 
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const whatsappMsg = encodeURIComponent("Hi, I want to use the Shop For Me service. Here are the details of what I want to buy: ");
-    window.open(`https://wa.me/1234567890?text=${whatsappMsg}`, '_blank');
+    const form = e.target as HTMLFormElement;
+    const requestDetails = (form.elements[0] as HTMLTextAreaElement).value;
+    const destination = (form.elements[1] as HTMLSelectElement).value;
+    const urgency = (form.elements[2] as HTMLSelectElement).value;
+
+    const subject = encodeURIComponent("Shop For Me Sourcing Request — INTMOVE");
+    const bodyText = `Hi INTMOVE Sourcing Concierge Team,
+
+I would like to request a new Shop For Me personal shopping request.
+
+Details:
+- Item details / URL: ${requestDetails}
+- Shipping Destination: ${destination}
+- Urgency / Preference: ${urgency}
+
+Thank you.`;
+
+    const body = encodeURIComponent(bodyText);
+    window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
   };
 
   return (
     <div className="bg-[#0a0a0a] min-h-screen font-sans text-white pb-20 selection:bg-[#D4AF37] selection:text-[#0a0a0a]">
       
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
-        <a href="https://wa.me/1234567890" target="_blank" rel="noreferrer" className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all flex items-center justify-center group hover:scale-110">
-          <MessageCircle className="w-6 h-6" />
-        </a>
-      </div>
+
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#0a0a0a]">
@@ -283,9 +295,12 @@ export default function ShopForMePage() {
                 <p className="text-white/60 mb-8 leading-relaxed">
                   For Africans abroad, we source authentic Garri, Egusi, Yam Flour, spices, and local snacks directly from local markets and ship them fresh to your door in the US, UK, or Canada.
                 </p>
-                <Link href="#request" className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl transition-all">
-                  Request Taste of Home <ArrowRight className="w-4 h-4" />
-                </Link>
+                <a href="https://t.me/fenway4u_concierge" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-red-600 hover:to-orange-500 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.51-.46-.01-1.33-.26-1.98-.47-.8-.26-1.42-.4-1.36-.85.03-.24.36-.49.99-.75 3.88-1.69 6.46-2.8 7.74-3.32 3.69-1.5 4.45-1.76 4.95-1.77.11 0 .36.03.52.16.13.11.17.26.19.37.01.07.03.22.02.39z"/>
+                  </svg>
+                  Telegram Shopping Concierge
+                </a>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#0a0a0a]/50 backdrop-blur-sm border border-white/10 p-6 rounded-2xl text-center">
@@ -363,7 +378,7 @@ export default function ShopForMePage() {
         </div>
       </section>
 
-      {/* Section 5: Live Product Request Form (WhatsApp Funnel) */}
+      {/* Section 5: Live Product Request Form (Sourcing Request Form) */}
       <section id="request" className="py-24 px-6 relative bg-[#0a0a0a]">
         <div className="container mx-auto max-w-4xl">
           <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] rounded-3xl p-8 md:p-12 border border-[#D4AF37]/30 shadow-[0_0_50px_rgba(212,175,55,0.05)] relative overflow-hidden">
@@ -408,7 +423,7 @@ export default function ShopForMePage() {
               </div>
 
               <button type="submit" className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] text-lg flex items-center justify-center gap-2">
-                <MessageCircle className="w-6 h-6" /> Connect With Concierge on WhatsApp
+                <Mail className="w-6 h-6" /> Send Purchase Request
               </button>
             </form>
           </div>
@@ -504,8 +519,14 @@ export default function ShopForMePage() {
               <Link href="#request" className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold px-10 py-5 rounded-xl transition-all text-lg shadow-[0_0_30px_rgba(212,175,55,0.3)] flex items-center justify-center gap-2">
                 <ShoppingBag className="w-5 h-5" /> Start Shopping
               </Link>
-              <a href="https://wa.me/1234567890" target="_blank" rel="noreferrer" className="bg-white/5 hover:bg-white/10 text-white font-medium px-10 py-5 rounded-xl border border-white/10 transition-all text-lg backdrop-blur-sm flex items-center justify-center gap-2">
-                <MessageCircle className="w-5 h-5" /> WhatsApp Concierge
+              <a href="https://t.me/fenway4u_concierge" target="_blank" rel="noreferrer" className="bg-gradient-to-tr from-[#0088cc] to-[#24A1DE] hover:from-[#24A1DE] hover:to-[#0088cc] text-white font-bold px-10 py-5 rounded-xl transition-all text-lg shadow-[0_0_20px_rgba(36,161,222,0.3)] flex items-center justify-center gap-2">
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.51-.46-.01-1.33-.26-1.98-.47-.8-.26-1.42-.4-1.36-.85.03-.24.36-.49.99-.75 3.88-1.69 6.46-2.8 7.74-3.32 3.69-1.5 4.45-1.76 4.95-1.77.11 0 .36.03.52.16.13.11.17.26.19.37.01.07.03.22.02.39z"/>
+                </svg>
+                Telegram Shopping Concierge
+              </a>
+              <a href="mailto:consult@fenway4u.com?subject=Shop For Me Purchasing Order — INTMOVE&body=Hi INTMOVE Sourcing Team,%0A%0AI would like to submit a Shop For Me purchase request.%0A%0AItems to buy:%0ASourcing Store Link:%0A%0AThank you." className="glass text-white font-bold px-10 py-5 rounded-xl hover:bg-white/10 border border-white/20 transition-all flex items-center justify-center gap-3 text-lg">
+                <Mail className="w-5 h-5 text-[#D4AF37]" /> Email Purchase Request
               </a>
             </div>
           </div>

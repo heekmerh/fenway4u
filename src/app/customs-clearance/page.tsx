@@ -9,7 +9,7 @@ import {
   Clock, TrendingDown, CheckCircle, Search, FileText, 
   MapPin, Anchor, Building2, ShoppingBag, Laptop, Wrench, 
   MessageCircle, ChevronDown, ArrowRight, Scan, Fingerprint,
-  Globe, PlaneTakeoff, UploadCloud
+  Globe, PlaneTakeoff, UploadCloud, Mail
 } from "lucide-react";
 
 // --- Data Structures ---
@@ -111,19 +111,31 @@ export default function CustomsClearancePage() {
 
   const handleSupportSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const whatsappMsg = encodeURIComponent("Hi, I need assistance with Customs Clearance. Here are my details: ");
-    window.open(`https://wa.me/1234567890?text=${whatsappMsg}`, '_blank');
+    const form = e.target as HTMLFormElement;
+    const type = (form.elements[0] as HTMLSelectElement).value;
+    const destination = (form.elements[1] as HTMLSelectElement).value;
+    const details = (form.elements[2] as HTMLInputElement).value;
+
+    const subject = encodeURIComponent("Customs Clearance Brokerage Request — INTMOVE");
+    const bodyText = `Hi INTMOVE Customs Clearance Team,
+
+I need assistance with customs clearance and brokerage.
+
+Details:
+- Shipment Type: ${type}
+- Destination Country: ${destination}
+- Estimated Cargo Value / Details: ${details}
+
+Thank you.`;
+
+    const body = encodeURIComponent(bodyText);
+    window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
   };
 
   return (
     <div className="bg-[#0f1115] min-h-screen font-sans text-white pb-20 selection:bg-[#D4AF37] selection:text-[#0f1115]">
       
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
-        <a href="https://wa.me/1234567890" target="_blank" rel="noreferrer" className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all flex items-center justify-center group hover:scale-110">
-          <MessageCircle className="w-6 h-6" />
-        </a>
-      </div>
+
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#0f1115]">
@@ -181,8 +193,8 @@ export default function CustomsClearancePage() {
               <Link href="#support" className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2 text-lg">
                 Request Clearance Support <ArrowRight className="w-5 h-5" />
               </Link>
-              <button className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
-                <MessageCircle className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" /> Speak With An Expert
+              <button onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))} className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
+                <Mail className="w-5 h-5 text-[#D4AF37] group-hover:scale-110 transition-transform" /> Speak With An Expert
               </button>
             </motion.div>
           </div>
@@ -392,8 +404,8 @@ export default function CustomsClearancePage() {
             <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
             
             <div className="text-center mb-10 relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Request Clearance Support</h2>
-              <p className="text-white/60">Upload details securely. Our experts will calculate your duties, review documents, and ensure compliance via WhatsApp.</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Request a Clearance Quote</h2>
+              <p className="text-white/60">Upload details securely. Our experts will calculate your duties, review documents, and ensure compliance via secure email channels.</p>
             </div>
 
             <form onSubmit={handleSupportSubmit} className="space-y-6 relative z-10">
@@ -423,10 +435,10 @@ export default function CustomsClearancePage() {
               </div>
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-4">
                 <ShieldCheck className="w-6 h-6 text-blue-400 shrink-0 mt-0.5" />
-                <p className="text-sm text-blue-200/70 font-light">You will be redirected to our secure WhatsApp channel where you can safely upload your Commercial Invoices, Bills of Lading, and IDs.</p>
+                <p className="text-sm text-blue-200/70 font-light">You will be redirected to your secure email client where you can safely attach your Commercial Invoices, Bills of Lading, and IDs.</p>
               </div>
               <button type="submit" className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] text-lg flex items-center justify-center gap-2">
-                <MessageCircle className="w-6 h-6" /> Connect With Customs Expert
+                <Mail className="w-6 h-6" /> Connect With Customs Team
               </button>
             </form>
           </div>
@@ -538,8 +550,11 @@ export default function CustomsClearancePage() {
               <Link href="#support" className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold px-10 py-5 rounded-xl transition-all text-lg shadow-[0_0_30px_rgba(212,175,55,0.3)]">
                 Get Clearance Assistance
               </Link>
-              <a href="https://wa.me/1234567890" target="_blank" rel="noreferrer" className="bg-white/5 hover:bg-white/10 text-white font-medium px-10 py-5 rounded-xl border border-white/10 transition-all text-lg backdrop-blur-sm flex items-center justify-center gap-2">
-                <MessageCircle className="w-5 h-5" /> WhatsApp Support
+              <a href="https://t.me/fenway4u_logistics" target="_blank" rel="noreferrer" className="bg-gradient-to-tr from-[#0088cc] to-[#24A1DE] hover:from-[#24A1DE] hover:to-[#0088cc] text-white font-medium px-10 py-5 rounded-xl transition-all text-lg shadow-[0_0_20px_rgba(0,136,204,0.3)] flex items-center justify-center gap-2">
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.51-.46-.01-1.33-.26-1.98-.47-.8-.26-1.42-.4-1.36-.85.03-.24.36-.49.99-.75 3.88-1.69 6.46-2.8 7.74-3.32 3.69-1.5 4.45-1.76 4.95-1.77.11 0 .36.03.52.16.13.11.17.26.19.37.01.07.03.22.02.39z"/>
+                </svg>
+                Telegram Clearance Assistance
               </a>
             </div>
           </div>

@@ -9,7 +9,7 @@ import {
   Search, ShieldCheck, Heart, UserPlus, FileCheck, 
   Car, Clock, Users, ArrowRight, MessageCircle, 
   ChevronDown, PlaneTakeoff, Navigation, Smartphone,
-  CreditCard, Compass, Globe
+  CreditCard, Compass, Globe, Mail
 } from "lucide-react";
 
 // --- Data Structures ---
@@ -102,19 +102,31 @@ export default function RelocationSupportPage() {
 
   const handleAssessmentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const whatsappMsg = encodeURIComponent("Hi, I would like a free travel & relocation assessment. Here are my details: ");
-    window.open(`https://wa.me/1234567890?text=${whatsappMsg}`, '_blank');
+    const form = e.target as HTMLFormElement;
+    const service = (form.elements[0] as HTMLSelectElement).value;
+    const destination = (form.elements[1] as HTMLSelectElement).value;
+    const details = (form.elements[2] as HTMLInputElement).value;
+
+    const subject = encodeURIComponent("Global Relocation & Travel Assessment — INTMOVE");
+    const bodyText = `Hi INTMOVE Relocation Team,
+
+I would like to request a free travel and relocation assessment.
+
+Details:
+- Service Needed: ${service}
+- Target Destination: ${destination}
+- Number of Travelers / Details: ${details}
+
+Thank you.`;
+
+    const body = encodeURIComponent(bodyText);
+    window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
   };
 
   return (
     <div className="bg-[#020617] min-h-screen font-sans text-white pb-20 selection:bg-[#D4AF37] selection:text-[#020617]">
       
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
-        <a href="https://wa.me/1234567890" target="_blank" rel="noreferrer" className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all flex items-center justify-center group hover:scale-110">
-          <MessageCircle className="w-6 h-6" />
-        </a>
-      </div>
+
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#020617]">
@@ -172,8 +184,8 @@ export default function RelocationSupportPage() {
               <Link href="#assessment" className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2 text-lg">
                 Start Your Application <ArrowRight className="w-5 h-5" />
               </Link>
-              <button className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
-                <MessageCircle className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" /> Book Consultation
+              <button onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))} className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
+                <Mail className="w-5 h-5 text-[#D4AF37] group-hover:scale-110 transition-transform" /> Book Consultation
               </button>
             </motion.div>
           </div>
@@ -410,7 +422,7 @@ export default function RelocationSupportPage() {
             
             <div className="text-center mb-10 relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Free Relocation Assessment</h2>
-              <p className="text-white/60">Share your travel goals with us. Our experts will review your eligibility and guide your next steps via WhatsApp.</p>
+              <p className="text-white/60">Share your travel goals with us. Our experts will review your eligibility and guide your next steps via secure email channels.</p>
             </div>
 
             <form onSubmit={handleAssessmentSubmit} className="space-y-6 relative z-10">
@@ -439,7 +451,7 @@ export default function RelocationSupportPage() {
                 </div>
               </div>
               <button type="submit" className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] text-lg flex items-center justify-center gap-2">
-                <MessageCircle className="w-6 h-6" /> Start Assessment on WhatsApp
+                <Mail className="w-6 h-6" /> Send Email Inquiry
               </button>
             </form>
           </div>
@@ -518,11 +530,17 @@ export default function RelocationSupportPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center relative z-10">
-              <Link href="#assessment" className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold px-10 py-5 rounded-xl transition-all text-lg shadow-[0_0_30px_rgba(212,175,55,0.3)]">
+              <button onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))} className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold px-10 py-5 rounded-xl transition-all text-lg shadow-[0_0_30px_rgba(212,175,55,0.3)]">
                 Book Consultation
-              </Link>
-              <a href="https://wa.me/1234567890" target="_blank" rel="noreferrer" className="bg-white/5 hover:bg-white/10 text-white font-medium px-10 py-5 rounded-xl border border-white/10 transition-all text-lg backdrop-blur-sm flex items-center justify-center gap-2">
-                <MessageCircle className="w-5 h-5" /> WhatsApp Support
+              </button>
+              <a href="https://t.me/fenway4u_visa" target="_blank" rel="noreferrer" className="bg-gradient-to-tr from-[#0088cc] to-[#24A1DE] hover:from-[#24A1DE] hover:to-[#0088cc] text-white font-bold px-10 py-5 rounded-xl transition-all text-lg shadow-[0_0_20px_rgba(36,161,222,0.3)] flex items-center justify-center gap-2">
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.51-.46-.01-1.33-.26-1.98-.47-.8-.26-1.42-.4-1.36-.85.03-.24.36-.49.99-.75 3.88-1.69 6.46-2.8 7.74-3.32 3.69-1.5 4.45-1.76 4.95-1.77.11 0 .36.03.52.16.13.11.17.26.19.37.01.07.03.22.02.39z"/>
+                </svg>
+                Telegram Relocation Support
+              </a>
+              <a href="mailto:consult@fenway4u.com?subject=Global Relocation & Travel Assessment — INTMOVE&body=Hi INTMOVE Relocation Team,%0A%0AI would like to request a travel and relocation assessment.%0A%0AName:%0ACurrent Location:%0ADestination Country:%0ATimeline:%0A%0AThank you." className="glass text-white font-bold px-10 py-5 rounded-xl hover:bg-white/10 border border-white/20 transition-all flex items-center justify-center gap-3 text-lg">
+                <Mail className="w-5 h-5 text-[#D4AF37]" /> Email Travel Advisor
               </a>
             </div>
           </div>

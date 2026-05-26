@@ -275,6 +275,72 @@ export default function CarShippingPage() {
     setIsModalOpen(true);
   };
 
+  const handleModalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const name = (form.elements[0] as HTMLInputElement).value;
+    const email = (form.elements[1] as HTMLInputElement).value;
+    const phone = (form.elements[2] as HTMLInputElement).value;
+    
+    let bidLimit = "";
+    let message = "";
+    if (selectedCar?.type === "auction") {
+      bidLimit = (form.elements[3] as HTMLInputElement).value;
+      message = (form.elements[4] as HTMLTextAreaElement).value;
+    } else {
+      message = (form.elements[3] as HTMLTextAreaElement).value;
+    }
+
+    const subject = encodeURIComponent(
+      selectedCar 
+        ? `${selectedCar.type === "auction" ? "Place Bid Offer" : "Secure Vehicle Request"} — ${selectedCar.year} ${selectedCar.make} ${selectedCar.model}` 
+        : "Car Sourcing Request — INTMOVE"
+    );
+
+    const bodyText = `Car Sourcing & Shipping Inquiry
+
+Details:
+- Customer Name: ${name}
+- Email: ${email}
+- Phone: ${phone}
+${selectedCar ? `- Vehicle: ${selectedCar.year} ${selectedCar.make} ${selectedCar.model}\n- Source: ${selectedCar.source}\n- Price/Bid: ${selectedCar.price}\n` : ""}
+${bidLimit ? `- Max Bid Limit: ${bidLimit}\n` : ""}
+- Message:
+${message}
+
+Thank you.`;
+
+    const body = encodeURIComponent(bodyText);
+    window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
+    setIsModalOpen(false);
+  };
+
+  const handlePartSourcingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const make = (form.elements[0] as HTMLInputElement).value;
+    const modelYear = (form.elements[1] as HTMLInputElement).value;
+    const part = (form.elements[2] as HTMLInputElement).value;
+    const destination = (form.elements[3] as HTMLInputElement).value;
+    const info = (form.elements[4] as HTMLTextAreaElement).value;
+
+    const subject = encodeURIComponent(`Car Part Sourcing Request — ${make} ${modelYear}`);
+    const bodyText = `Car Part Sourcing & Shipping Request
+
+Details:
+- Vehicle Make: ${make}
+- Model & Year: ${modelYear}
+- Part Required: ${part}
+- Shipping Destination: ${destination}
+- Additional Information:
+${info}
+
+Thank you.`;
+
+    const body = encodeURIComponent(bodyText);
+    window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
+  };
+
   return (
     <div className="bg-[#050505] min-h-screen font-sans text-white pb-20 selection:bg-[#D4AF37] selection:text-[#050505]">
       
@@ -307,7 +373,7 @@ export default function CarShippingPage() {
                 <p className="text-white/50 mb-6 text-sm">Please fill out the form below and our sourcing team will contact you shortly.</p>
               )}
 
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-4" onSubmit={handleModalSubmit}>
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Full Name</label>
                   <input type="text" required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] focus:bg-white/10 transition-colors" placeholder="John Doe" />
@@ -503,7 +569,7 @@ export default function CarShippingPage() {
             <div className="w-full lg:w-1/2 relative z-10">
               <div className="bg-[#1A1A1A] p-8 rounded-2xl border border-white/5 shadow-xl">
                 <h3 className="text-xl font-bold mb-6">Request Part Sourcing</h3>
-                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); openModal(); }}>
+                <form className="space-y-4" onSubmit={handlePartSourcingSubmit}>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-white/50 mb-1">Car Make</label>
@@ -560,6 +626,12 @@ export default function CarShippingPage() {
               <button onClick={() => openModal()} className="bg-[#D4AF37] text-black font-bold px-10 py-5 rounded-xl hover:bg-[#F3C332] transition-all text-lg shadow-[0_0_20px_rgba(212,175,55,0.2)]">
                 Request Sourcing
               </button>
+              <a href="https://t.me/fenway4u_logistics" target="_blank" rel="noreferrer" className="bg-gradient-to-tr from-[#0088cc] to-[#24A1DE] hover:from-[#24A1DE] hover:to-[#0088cc] text-white font-medium px-10 py-5 rounded-xl transition-all text-lg shadow-[0_0_20px_rgba(0,136,204,0.3)] flex items-center justify-center gap-2">
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.51-.46-.01-1.33-.26-1.98-.47-.8-.26-1.42-.4-1.36-.85.03-.24.36-.49.99-.75 3.88-1.69 6.46-2.8 7.74-3.32 3.69-1.5 4.45-1.76 4.95-1.77.11 0 .36.03.52.16.13.11.17.26.19.37.01.07.03.22.02.39z"/>
+                </svg>
+                Telegram Auto Shipping
+              </a>
               <Link href="/#quote" className="bg-white/5 text-white font-medium px-10 py-5 rounded-xl hover:bg-white/10 border border-white/10 transition-all text-lg backdrop-blur-sm">
                 Get Shipping Quote
               </Link>

@@ -629,10 +629,10 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                 </div>
 
                 {/* Steps Body */}
-                <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between">
+                <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-start">
                   <AnimatePresence mode="wait">
                     {!isSubmitted ? (
-                      <div className="space-y-6 flex-1">
+                      <div className="space-y-6">
                         
                         {/* STEP 1: PERSONAL INFORMATION */}
                         {activeStep === 1 && (

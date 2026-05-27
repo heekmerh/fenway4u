@@ -28,32 +28,36 @@ const whatWeBuy = [
     desc: "iPhones, gaming consoles, laptops, and smart TVs.", 
     icon: Smartphone,
     color: "from-blue-500/20 to-cyan-500/5",
-    border: "group-hover:border-blue-500/50",
-    image: "/images/tech_gadget_sourcing.png"
+    border: "hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.25)]",
+    image: "/images/tech_gadget_sourcing.png",
+    accent: "text-blue-400 bg-blue-500/20 border-blue-500/30"
   },
   { 
     title: "Vehicles & Car Parts", 
     desc: "Auction vehicles, luxury cars, and hard-to-find auto parts.", 
     icon: Car,
     color: "from-purple-500/20 to-fuchsia-500/5",
-    border: "group-hover:border-purple-500/50",
-    image: "/images/car_auction_1_1778971403142.png"
+    border: "hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.25)]",
+    image: "/images/car_auction_1_1778971403142.png",
+    accent: "text-purple-400 bg-purple-500/20 border-purple-500/30"
   },
   { 
     title: "Fashion & Luxury Goods", 
     desc: "Designer stores, outlet malls, and luxury brand sourcing.", 
     icon: Shirt,
     color: "from-[#D4AF37]/20 to-yellow-500/5",
-    border: "group-hover:border-[#D4AF37]/50",
-    image: "/images/luxury_fashion_sourcing.png"
+    border: "hover:border-[#D4AF37]/50 hover:shadow-[0_0_30px_rgba(212,175,55,0.25)]",
+    image: "/images/luxury_fashion_sourcing.png",
+    accent: "text-[#D4AF37] bg-[#D4AF37]/20 border-[#D4AF37]/30"
   },
   { 
     title: "Furniture & Home", 
     desc: "Office furniture, luxury home décor, and kitchen appliances.", 
     icon: Compass,
     color: "from-emerald-500/20 to-teal-500/5",
-    border: "group-hover:border-emerald-500/50",
-    image: "/images/sea_freight_test_1_1779128965828.png"
+    border: "hover:border-emerald-500/50 hover:shadow-[0_0_30px_rgba(16,185,129,0.25)]",
+    image: "/images/sea_freight_test_1_1779128965828.png",
+    accent: "text-emerald-400 bg-emerald-500/20 border-emerald-500/30"
   }
 ];
 
@@ -405,21 +409,27 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
   };
 
   return (
-    <div className="bg-[#0a0a0a] min-h-screen font-sans text-white pb-20 selection:bg-[#D4AF37] selection:text-[#0a0a0a]">
+    <div className="bg-[#050505] min-h-screen font-sans text-white pb-20 selection:bg-[#D4AF37] selection:text-[#0a0a0a] relative overflow-hidden">
       
+      {/* Premium Ambient Background Glows */}
+      <div className="absolute top-[10%] left-[-20%] w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[150px] pointer-events-none -z-10" />
+      <div className="absolute top-[35%] right-[-20%] w-[600px] h-[600px] bg-purple-900/15 rounded-full blur-[150px] pointer-events-none -z-10" />
+      <div className="absolute top-[60%] left-[-20%] w-[600px] h-[600px] bg-orange-950/15 rounded-full blur-[150px] pointer-events-none -z-10" />
+      <div className="absolute top-[85%] right-[-10%] w-[500px] h-[500px] bg-fuchsia-950/10 rounded-full blur-[150px] pointer-events-none -z-10" />
+
       {/* Hero Section */}
-      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#0a0a0a]">
+      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#050505]">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/95 to-[#050505]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D4AF37]/10 via-[#050505]/90 to-[#050505]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-950/20 via-[#050505]/90 to-[#050505]" />
           <Image 
             src="/images/shop_for_me_hero.png" 
             alt="Shop For Me Sourcing" 
             fill 
             priority
-            className="object-cover opacity-20 pointer-events-none mix-blend-screen"
+            className="object-cover opacity-35 pointer-events-none mix-blend-screen"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/50 via-[#0a0a0a] to-[#0a0a0a]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D4AF37]/15 via-[#0a0a0a]/90 to-[#0a0a0a]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-950/20 via-[#0a0a0a]/90 to-[#0a0a0a]" />
           
           <motion.div 
             animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
@@ -452,9 +462,12 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-tight text-white"
+              className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-tight text-white"
             >
-              Buy Anything <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-yellow-200">From Anywhere</span>
+              Shop Worldwide. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#D4AF37] to-cyan-400">
+                Delivered in Style.
+              </span>
             </motion.h1>
             
             <motion.p 
@@ -484,7 +497,7 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
       </section>
 
       {/* Advanced Features Placeholder Banner */}
-      <div className="border-y border-white/5 bg-[#111] relative overflow-hidden">
+      <div className="border-y border-white/5 bg-[#0d0d0d] relative overflow-hidden">
         <div className="container mx-auto max-w-7xl px-6 py-6 flex flex-wrap items-center justify-center gap-12 relative z-10 text-white/50 text-sm font-medium tracking-widest uppercase">
           <span className="flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors"><Search className="w-4 h-4 text-blue-400" /> AI Product Sourcing</span>
           <span className="flex items-center gap-2 cursor-pointer hover:text-green-400 transition-colors"><CreditCard className="w-4 h-4 text-green-400" /> Dynamic Sourcing Calculator</span>
@@ -493,41 +506,52 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
       </div>
 
       {/* Section 1: How It Works Timeline */}
-      <section className="py-24 px-6 bg-[#0a0a0a]">
+      <section className="py-24 px-6 bg-[#050505]">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">How The Service Works</h2>
-            <p className="text-white/50 text-lg">Four steps to receiving your international items.</p>
+            <h2 className="text-3xl md:text-5xl font-black mb-4">How The Service Works</h2>
+            <p className="text-white/40 text-lg">Four steps to receiving your international items.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-6 relative">
             <div className="hidden md:block absolute top-8 left-0 w-full h-[2px] bg-gradient-to-r from-[#D4AF37]/10 via-[#D4AF37]/50 to-[#D4AF37]/10 -z-0" />
             
-            {howItWorks.map((step, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="relative z-10 text-center"
-              >
-                <div className="w-16 h-16 mx-auto bg-[#0a0a0a] border-2 border-[#D4AF37]/40 rounded-xl flex items-center justify-center text-xl font-bold text-[#D4AF37] mb-6 shadow-[0_0_15px_rgba(212,175,55,0.15)] group hover:scale-110 transition-transform">
-                  <step.icon className="w-6 h-6" />
-                </div>
-                <h3 className="font-bold text-lg mb-3">{step.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{step.desc}</p>
-              </motion.div>
-            ))}
+            {howItWorks.map((step, idx) => {
+              const borderColors = [
+                "hover:border-blue-500/30 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]",
+                "hover:border-purple-500/30 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]",
+                "hover:border-[#D4AF37]/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.15)]",
+                "hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]"
+              ];
+              const textGlows = ["text-blue-400", "text-purple-400", "text-[#D4AF37]", "text-emerald-400"];
+              return (
+                <motion.div 
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className={`bg-[#0d0d0d]/80 backdrop-blur-md p-8 rounded-3xl border border-white/5 transition-all duration-300 relative z-10 text-center ${borderColors[idx]}`}
+                >
+                  <div className={`w-14 h-14 mx-auto bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-xl font-bold ${textGlows[idx]} mb-6 shadow-xl`}>
+                    <step.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-extrabold text-lg mb-3">{step.title}</h3>
+                  <p className="text-white/40 text-xs leading-relaxed">{step.desc}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Section 2: What We Can Buy (Focus on emotional African Foods) */}
-      <section className="py-24 px-6 relative bg-[#111] border-y border-white/5">
-        <div className="container mx-auto max-w-7xl">
+      <section className="py-24 px-6 relative bg-[#090909] border-y border-white/5">
+        <div className="absolute top-[20%] right-[10%] w-[350px] h-[350px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none -z-0" />
+        <div className="container mx-auto max-w-7xl relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">What We Source <span className="text-[#D4AF37]">For You</span></h2>
+            <h2 className="text-3xl md:text-5xl font-black mb-4">What We Source <span className="text-[#D4AF37]">For You</span></h2>
+            <p className="text-white/40 text-sm max-w-xl mx-auto">Explore the global sourcing categories we purchase, inspect, and ship securely to your doorstep.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
@@ -538,24 +562,24 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className={`bg-[#0a0a0a] rounded-3xl border border-white/5 transition-all group relative overflow-hidden flex flex-col ${item.border}`}
+                className={`bg-[#0d0d0d]/90 backdrop-blur-md rounded-3xl border border-white/5 transition-all duration-300 group relative overflow-hidden flex flex-col hover:-translate-y-2 ${item.border}`}
               >
                 <div className="relative h-48 w-full overflow-hidden">
                   <Image 
                     src={item.image} 
                     alt={item.title} 
                     fill 
-                    className="object-cover group-hover:scale-110 transition-transform duration-500" 
+                    className="object-cover group-hover:scale-110 transition-transform duration-750" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
-                  <div className="absolute top-4 left-4 w-10 h-10 bg-[#0a0a0a]/60 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10">
-                    <item.icon className="w-5 h-5 text-white" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-[#0d0d0d]/35 to-transparent" />
+                  <div className={`absolute top-4 left-4 w-10 h-10 rounded-xl flex items-center justify-center border backdrop-blur-md ${item.accent}`}>
+                    <item.icon className="w-5 h-5" />
                   </div>
                 </div>
                 <div className="p-6 flex-1 flex flex-col justify-between relative z-10">
                   <div>
-                    <h3 className="text-xl font-bold mb-2 text-white">{item.title}</h3>
-                    <p className="text-white/50 leading-relaxed text-xs">{item.desc}</p>
+                    <h3 className="text-xl font-bold mb-2 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-white/80 transition-colors">{item.title}</h3>
+                    <p className="text-white/40 leading-relaxed text-xs">{item.desc}</p>
                   </div>
                 </div>
               </motion.div>
@@ -563,20 +587,20 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
           </div>
 
           {/* Dedicated African Sourcing Banner */}
-          <div className="bg-gradient-to-r from-orange-950/40 via-red-950/20 to-yellow-950/10 border border-orange-500/20 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl">
-            <div className="absolute right-0 top-0 w-64 h-full bg-orange-500/10 blur-3xl" />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative z-10">
+          <div className="bg-gradient-to-br from-[#1b0c03] via-[#120703] to-[#080808] border-2 border-orange-500/30 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl">
+            <div className="absolute right-0 top-0 w-80 h-full bg-orange-500/10 blur-[120px]" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center relative z-10">
               <div>
-                <div className="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-xs font-bold uppercase backdrop-blur-md border border-orange-500/30 mb-4">
-                  <Heart className="w-3 h-3 fill-orange-400" /> Taste of Home
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-400 px-4 py-1.5 rounded-full text-xs font-extrabold uppercase backdrop-blur-md border border-orange-500/30 mb-6">
+                  <Heart className="w-3.5 h-3.5 fill-orange-400 animate-pulse" /> Taste of Home
                 </div>
-                <h2 className="text-3xl md:text-5xl font-bold mb-4">Authentic African Groceries & Foods</h2>
-                <p className="text-xl text-white/80 italic font-light mb-6">"Home is just one shipment away."</p>
-                <p className="text-white/60 mb-8 leading-relaxed">
+                <h2 className="text-3xl md:text-5xl font-black mb-4 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#D4AF37] to-red-400">Authentic African Groceries</h2>
+                <p className="text-lg text-white/90 italic font-light mb-6">"Home is just one shipment away."</p>
+                <p className="text-white/50 mb-8 text-sm leading-relaxed">
                   For Africans abroad, we source authentic Garri, Egusi, Yam Flour, seasonings, spices, and snacks directly from trusted local markets and ship them fresh to your door in the US, UK, or Canada under tight freshness guarantees.
                 </p>
-                <a href="#request" onClick={() => setActiveTab("food-builder")} className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-red-600 hover:to-orange-500 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)]">
-                  Launch Food Sourcing Builder <ArrowRight className="w-4 h-4" />
+                <a href="#request" onClick={() => setActiveTab("food-builder")} className="inline-flex items-center gap-3 bg-gradient-to-r from-orange-500 via-[#D4AF37] to-red-650 hover:from-red-650 hover:via-[#D4AF37] hover:to-orange-500 text-white font-extrabold px-8 py-4 rounded-xl transition-all shadow-[0_0_30px_rgba(239,68,68,0.35)] transform hover:scale-105">
+                  Launch Food Sourcing Builder <ArrowRight className="w-5 h-5" />
                 </a>
               </div>
               <div className="relative h-[350px] lg:h-[450px] w-full rounded-3xl overflow-hidden border border-orange-500/20 group shadow-2xl">
@@ -584,17 +608,17 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
                   src="/images/african_groceries_banner.png" 
                   alt="Authentic African Groceries" 
                   fill 
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/90 via-[#0a0a0a]/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#080808]/90 via-[#080808]/30 to-transparent" />
                 
                 {/* Floating Info Grid Overlay */}
                 <div className="absolute bottom-6 left-6 right-6 grid grid-cols-2 gap-4">
-                  <div className="bg-[#0a0a0a]/85 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center shadow-lg">
+                  <div className="bg-[#080808]/85 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center shadow-lg">
                     <Coffee className="w-6 h-6 text-orange-400 mx-auto mb-2" />
                     <p className="font-bold text-xs text-white/90">Vacuum Sealed Protection</p>
                   </div>
-                  <div className="bg-[#0a0a0a]/85 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center shadow-lg">
+                  <div className="bg-[#080808]/85 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center shadow-lg">
                     <Package className="w-6 h-6 text-orange-400 mx-auto mb-2" />
                     <p className="font-bold text-xs text-white/90">Global Air Freight Sourcing</p>
                   </div>
@@ -714,67 +738,92 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
-                className="bg-gradient-to-b from-[#111] to-[#0a0a0a] rounded-3xl p-8 md:p-12 border border-[#D4AF37]/30 shadow-[0_0_50px_rgba(212,175,55,0.05)] relative overflow-hidden"
+                className="bg-gradient-to-b from-[#111]/90 to-[#0a0a0a]/95 rounded-3xl p-6 md:p-10 border border-[#D4AF37]/30 shadow-[0_0_50px_rgba(212,175,55,0.05)] relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
                 
-                <div className="text-center mb-10 relative z-10">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-4">Standard Sourcing Request</h2>
-                  <p className="text-white/60">Paste a URL or describe what you need. Our personal shoppers will get you a quote instantly.</p>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                  
+                  {/* Form Left (7 columns) */}
+                  <div className="lg:col-span-7 space-y-6">
+                    <div className="text-left">
+                      <h2 className="text-3xl font-extrabold mb-2">Standard Purchase Sourcing</h2>
+                      <p className="text-white/50 text-sm">Paste a product URL or describe what you need. Our personal shoppers will get you a quote instantly.</p>
+                    </div>
+
+                    <form onSubmit={handleRequestSubmit} className="space-y-5">
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-white/60 mb-2">Product URL or Item Description *</label>
+                        <textarea 
+                          rows={3} 
+                          required 
+                          value={stdDetails}
+                          onChange={(e) => setStdDetails(e.target.value)}
+                          className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37] transition-colors resize-none placeholder:text-white/20" 
+                          placeholder="e.g. https://amazon.com/iphone15 OR 'Please source 5 bags of Ijebu Garri...'" 
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold uppercase text-white/60 mb-2">Destination Country *</label>
+                          <select 
+                            value={stdDestination}
+                            onChange={(e) => setStdDestination(e.target.value)}
+                            className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37] transition-colors appearance-none"
+                          >
+                            <option>United States</option>
+                            <option>United Kingdom</option>
+                            <option>Canada</option>
+                            <option>Nigeria / Africa</option>
+                            <option>Other</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold uppercase text-white/60 mb-2">Urgency / Shipping Preference *</label>
+                          <select 
+                            value={stdUrgency}
+                            onChange={(e) => setStdUrgency(e.target.value)}
+                            className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37] transition-colors appearance-none"
+                          >
+                            <option>Express Air (Fastest)</option>
+                            <option>Standard Delivery</option>
+                            <option>Sea Freight (Bulk/Cheapest)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Fake Upload Area for UI Polish */}
+                      <div className="border-2 border-dashed border-white/10 rounded-xl p-5 text-center hover:border-[#D4AF37]/40 transition-colors cursor-pointer bg-white/3">
+                        <UploadCloud className="w-6 h-6 text-white/30 mx-auto mb-2" />
+                        <p className="text-xs text-white/50">Upload screenshots of the item (Optional)</p>
+                      </div>
+
+                      <button type="submit" className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-extrabold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] text-base flex items-center justify-center gap-2">
+                        <Mail className="w-5 h-5" /> Send Purchase Request
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Sourcing Preview Right (5 columns) */}
+                  <div className="lg:col-span-5 h-full hidden lg:flex flex-col justify-center">
+                    <div className="relative h-[380px] w-full rounded-2xl overflow-hidden border border-white/10 group shadow-2xl">
+                      <Image 
+                        src="/images/shop_for_me_electronics_1779126348241.png" 
+                        alt="Premium Shopping Sourcing" 
+                        fill 
+                        className="object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+                      <div className="absolute bottom-6 left-6 right-6 bg-[#0a0a0a]/85 backdrop-blur-md border border-white/10 p-5 rounded-xl text-left">
+                        <p className="text-[10px] font-bold uppercase text-[#D4AF37] tracking-widest mb-1">Secure Procurement Network</p>
+                        <h4 className="font-extrabold text-sm text-white">Full Sourcing Coverage</h4>
+                        <p className="text-[11px] text-white/50 mt-1 leading-normal">From luxury goods in London to high-end electronics in the US, we manage full procurement and package inspection securely.</p>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
-
-                <form onSubmit={handleRequestSubmit} className="space-y-6 relative z-10">
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2">Product URL or Item Description</label>
-                    <textarea 
-                      rows={3} 
-                      required 
-                      value={stdDetails}
-                      onChange={(e) => setStdDetails(e.target.value)}
-                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors resize-none" 
-                      placeholder="e.g. https://amazon.com/iphone15 OR 'Please source 5 bags of Ijebu Garri...'" 
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-2">Destination Country</label>
-                      <select 
-                        value={stdDestination}
-                        onChange={(e) => setStdDestination(e.target.value)}
-                        className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors appearance-none"
-                      >
-                        <option>United States</option>
-                        <option>United Kingdom</option>
-                        <option>Canada</option>
-                        <option>Nigeria / Africa</option>
-                        <option>Other</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-2">Urgency / Shipping Preference</label>
-                      <select 
-                        value={stdUrgency}
-                        onChange={(e) => setStdUrgency(e.target.value)}
-                        className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors appearance-none"
-                      >
-                        <option>Express Air (Fastest)</option>
-                        <option>Standard Delivery</option>
-                        <option>Sea Freight (Bulk/Cheapest)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Fake Upload Area for UI Polish */}
-                  <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-white/30 transition-colors cursor-pointer bg-white/5">
-                    <UploadCloud className="w-8 h-8 text-white/30 mx-auto mb-2" />
-                    <p className="text-sm text-white/50">Upload screenshots of the item (Optional)</p>
-                  </div>
-
-                  <button type="submit" className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] text-lg flex items-center justify-center gap-2">
-                    <Mail className="w-6 h-6" /> Send Purchase Request
-                  </button>
-                </form>
               </motion.div>
             )}
 

@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 import { 
   ShoppingBag, Package, Smartphone, Car, Shirt, 
   Coffee, Gift, Heart, Star, Search, ShieldCheck, 
   Globe, Truck, ChevronDown, ArrowRight, MessageCircle, 
-  UploadCloud, Compass, CreditCard, Building2, MapPin, Mail
+  UploadCloud, Compass, CreditCard, Building2, MapPin, Mail,
+  Plus, Trash2, HelpCircle, Check, PlusCircle, CheckCircle, 
+  AlertCircle, ChevronUp, FileText, Sparkles
 } from "lucide-react";
 
 // --- Data Structures ---
@@ -54,9 +56,9 @@ const whatWeBuy = [
 const premiumServices = [
   { title: "Personal Shopper Service", desc: "Dedicated assistant, product recommendations, and price comparisons for busy professionals.", icon: UserIcon },
   { title: "Gift Purchase & Delivery", desc: "Buy gifts internationally, add personalized messages, and request premium packaging.", icon: Gift },
-  { title: "Exclusive Item Sourcing", desc: "We find rare or hard-to-get products like sold-out electronics or limited luxury bags.", icon: Star },
+  { title: "Exclusive Item Sourcing", desc: "We find rare or hard-to-get products like limited luxury bags or sold-out electronics.", icon: Star },
   { title: "Bulk Buying Assistance", desc: "Sourcing wholesale inventory and commercial goods for resellers and small businesses.", icon: Building2 },
-  { title: "African Care Packages", desc: "Emotional 'Taste of Home' boxes, student survival packages, and local snacks.", icon: Heart },
+  { title: "African Care Packages", desc: "Taste of Home boxes, student survival packages, and fresh local groceries sourced with care.", icon: Heart },
   { title: "Warehouse Consolidation", desc: "Combine multiple orders to reduce shipping costs and store items temporarily.", icon: Package }
 ];
 
@@ -92,10 +94,10 @@ const testimonials = [
 const faqs = [
   { q: "Can you buy products on my behalf?", a: "Yes. You simply send us the link or tell us what you want, and our personal shoppers will purchase it using our local payment methods." },
   { q: "Which countries do you ship to?", a: "We ship globally, with specialized high-speed routes covering the US, UK, Canada, and across Africa." },
-  { q: "Can I request specific African foods?", a: "Absolutely. Our 'African Care Package' service sources authentic local foods, spices, and snacks directly from local markets and ships them to you internationally." },
+  { q: "Can I request specific African foods?", a: "Absolutely. Our 'African Foods Sourcing' builder lets you create custom grocery lists including Garri, Egusi, Spices, and snacks sourced directly from local markets." },
   { q: "Do you combine multiple packages?", a: "Yes. We offer warehouse consolidation. You can buy items from multiple stores, and we will package them into a single shipment to save you money." },
-  { q: "How long does delivery take?", a: "Depending on the shipping method chosen (Air or Sea) and the destination, delivery can take anywhere from 3 to 14 days after we receive the item at our warehouse." },
-  { q: "Can businesses use this service?", a: "Yes, we offer Bulk Buying Assistance to help businesses and resellers source wholesale inventory internationally." }
+  { q: "How long does food shipping take?", a: "To ensure maximum freshness, food items are vacuum-sealed and priority air shipped, typically arriving at your international address within 3 to 7 days." },
+  { q: "Do you handle customs clearance for food?", a: "Yes. Sourced food cargo includes export permits and import documentation brokerage, ensuring hassle-free port clearance." }
 ];
 
 // Helper icons
@@ -108,25 +110,238 @@ function UserIcon({ className }: { className?: string }) {
   );
 }
 
+// Interactivity Interface for Foods Row
+interface FoodItem {
+  id: string;
+  name: string;
+  unit: string;
+  qty: string;
+  budget: string;
+  brand: string;
+  notes: string;
+}
+
+interface UploadedFile {
+  name: string;
+  size: string;
+  progress: number;
+  completed: boolean;
+}
+
 export default function ShopForMePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  
+  // Tabs State
+  const [activeTab, setActiveTab] = useState<"standard" | "food-builder">("standard");
 
+  // Standard Form State
+  const [stdDetails, setStdDetails] = useState("");
+  const [stdDestination, setStdDestination] = useState("United States");
+  const [stdUrgency, setStdUrgency] = useState("Express Air (Fastest)");
+
+  // Food Builder State
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([
+    { id: "1", name: "", unit: "KG", qty: "1", budget: "$10–$25", brand: "", notes: "" }
+  ]);
+  const [foodName, setFoodName] = useState("");
+  const [foodEmail, setFoodEmail] = useState("");
+  const [foodPhone, setFoodPhone] = useState("");
+  const [foodDestination, setFoodDestination] = useState("United States");
+  const [foodAddress, setFoodAddress] = useState("");
+  const [deliverySpeed, setDeliverySpeed] = useState<"standard" | "express" | "priority">("express");
+  const [freshnessProtection, setFreshnessProtection] = useState(true);
+  const [uploadedFoodFiles, setUploadedFoodFiles] = useState<UploadedFile[]>([]);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const [restoreDraftAvailable, setRestoreDraftAvailable] = useState(false);
+
+  // Suggestion parameters
+  const [focusedRowId, setFocusedRowId] = useState<string | null>(null);
+  const commonTraditionalStaples = [
+    "Ijebu Garri", "Yellow Garri", "White Garri", "Egusi (Melon Seed)", 
+    "Honeywell Poundo Yam", "Ola-Oluwa Poundo Yam", "Suya Spice", "Palm Oil", 
+    "Dried Catfish", "Plantain Chips", "Elubo (Yam Flour)", "Oron Crayfish", 
+    "Bitter Leaf", "Knorr Seasoning Cubes", "Yam Tubers", "Stockfish", "Chin Chin", 
+    "Kilishi", "Achu Spice", "Dawa Dawa"
+  ];
+
+  // Preset package templates
+  const presets = {
+    survival: [
+      { id: "s1", name: "Indomie Noodles", unit: "Cartons", qty: "1", budget: "$25–$50", brand: "Dufil Prima", notes: "Chicken flavor preferred" },
+      { id: "s2", name: "Ijebu Garri", unit: "KG", qty: "5", budget: "$10–$25", brand: "Local Market", notes: "Extra sour" },
+      { id: "s3", name: "Suya Spice", unit: "Packs", qty: "3", budget: "$10–$25", brand: "Kano Sourced", notes: "Mild hotness" },
+      { id: "s4", name: "Plantain Chips", unit: "Packs", qty: "10", budget: "$10–$25", brand: "Premium Sourced", notes: "Lightly salted" }
+    ],
+    tasteOfHome: [
+      { id: "t1", name: "Egusi (Melon Seed)", unit: "KG", qty: "2", budget: "$10–$25", brand: "Hand-peeled local", notes: "Un-grounded preferred" },
+      { id: "t2", name: "Poundo Yam", unit: "KG", qty: "4", budget: "$10–$25", brand: "Honeywell Brand", notes: "Sourced fresh" },
+      { id: "t3", name: "Palm Oil", unit: "Liters", qty: "3", budget: "$10–$25", brand: "Nsukka Premium", notes: "Pure extraction" },
+      { id: "t4", name: "Dried Fish (Catfish)", unit: "Pieces", qty: "5", budget: "$25–$50", brand: "Epe Market Sourced", notes: "Smoked bone-dry" }
+    ],
+    familyBundle: [
+      { id: "f1", name: "White Garri", unit: "KG", qty: "20", budget: "$50–$100", brand: "Bulk Sourced", notes: "Sieved clean" },
+      { id: "f2", name: "Elubo (Yam Flour)", unit: "KG", qty: "10", budget: "$25–$50", brand: "Local Sourced", notes: "For Amala" },
+      { id: "f3", name: "Crayfish", unit: "Packs", qty: "5", budget: "$10–$25", brand: "Oron Premium", notes: "Blended clean" },
+      { id: "f4", name: "Palm Oil", unit: "Liters", qty: "5", budget: "$25–$50", brand: "Nsukka Brand", notes: "Aviation approved cans" }
+    ]
+  };
+
+  // Add Item row
+  const addFoodItemRow = () => {
+    const newId = (foodItems.length + 1).toString();
+    setFoodItems([...foodItems, { id: newId, name: "", unit: "KG", qty: "1", budget: "$10–$25", brand: "", notes: "" }]);
+  };
+
+  // Remove Item row
+  const removeFoodItemRow = (id: string) => {
+    if (foodItems.length === 1) return;
+    setFoodItems(foodItems.filter(item => item.id !== id));
+  };
+
+  // Row input changes
+  const handleRowChange = (id: string, field: keyof FoodItem, value: string) => {
+    setFoodItems(foodItems.map(item => item.id === id ? { ...item, [field]: value } : item));
+  };
+
+  // Inject presets
+  const applyPresetList = (presetType: "survival" | "tasteOfHome" | "familyBundle") => {
+    setFoodItems(presets[presetType]);
+  };
+
+  // Drag and drop list file
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setIsDragActive(true);
+    } else if (e.type === "dragleave") {
+      setIsDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFiles(e.target.files);
+    }
+  };
+
+  const handleFiles = (files: FileList) => {
+    Array.from(files).forEach(file => {
+      const newFile: UploadedFile = {
+        name: file.name,
+        size: `${(file.size / 1024).toFixed(1)} KB`,
+        progress: 0,
+        completed: false
+      };
+      setUploadedFoodFiles(prev => [...prev, newFile]);
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 25;
+        setUploadedFoodFiles(prev => 
+          prev.map(f => f.name === file.name ? { ...f, progress } : f)
+        );
+        if (progress >= 100) {
+          clearInterval(interval);
+          setUploadedFoodFiles(prev => 
+            prev.map(f => f.name === file.name ? { ...f, completed: true } : f)
+          );
+        }
+      }, 250);
+    });
+  };
+
+  // Autosave triggers for foods builder
+  useEffect(() => {
+    if (foodItems.length > 1 || foodItems[0].name !== "") {
+      localStorage.setItem("intmove_food_draft", JSON.stringify(foodItems));
+    }
+  }, [foodItems]);
+
+  // Load draft on mount
+  useEffect(() => {
+    const draft = localStorage.getItem("intmove_food_draft");
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        if (parsed.length > 0 && parsed[0].name !== "") {
+          setRestoreDraftAvailable(true);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const restoreFoodDraft = () => {
+    const draft = localStorage.getItem("intmove_food_draft");
+    if (draft) {
+      setFoodItems(JSON.parse(draft));
+    }
+    setRestoreDraftAvailable(false);
+  };
+
+  const discardFoodDraft = () => {
+    localStorage.removeItem("intmove_food_draft");
+    setFoodItems([{ id: "1", name: "", unit: "KG", qty: "1", budget: "$10–$25", brand: "", notes: "" }]);
+    setRestoreDraftAvailable(false);
+  };
+
+  // Dynamic estimate calculations
+  const calculateFoodEstimate = () => {
+    let itemsSubtotal = 0;
+    foodItems.forEach(item => {
+      let itemBudgetAvg = 15;
+      if (item.budget === "$10–$25") itemBudgetAvg = 17.5;
+      else if (item.budget === "$25–$50") itemBudgetAvg = 37.5;
+      else if (item.budget === "$50–$100") itemBudgetAvg = 75;
+      else itemBudgetAvg = 20;
+
+      const qty = parseFloat(item.qty) || 1;
+      itemsSubtotal += itemBudgetAvg * qty;
+    });
+
+    const sourcingFee = Math.max(35, itemsSubtotal * 0.10);
+    
+    let shippingFee = 45;
+    if (deliverySpeed === "express") shippingFee = 85;
+    else if (deliverySpeed === "priority") shippingFee = 120;
+
+    const wrapFee = freshnessProtection ? 25 : 0;
+    const grandTotal = itemsSubtotal + sourcingFee + shippingFee + wrapFee;
+
+    return {
+      subtotal: Math.round(itemsSubtotal),
+      sourcing: Math.round(sourcingFee),
+      shipping: shippingFee,
+      wrap: wrapFee,
+      total: Math.round(grandTotal)
+    };
+  };
+
+  const estimates = calculateFoodEstimate();
+
+  // Handlers standard submission
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const requestDetails = (form.elements[0] as HTMLTextAreaElement).value;
-    const destination = (form.elements[1] as HTMLSelectElement).value;
-    const urgency = (form.elements[2] as HTMLSelectElement).value;
-
     const subject = encodeURIComponent("Shop For Me Sourcing Request — INTMOVE");
     const bodyText = `Hi INTMOVE Sourcing Concierge Team,
 
 I would like to request a new Shop For Me personal shopping request.
 
 Details:
-- Item details / URL: ${requestDetails}
-- Shipping Destination: ${destination}
-- Urgency / Preference: ${urgency}
+- Item details / URL: ${stdDetails}
+- Shipping Destination: ${stdDestination}
+- Urgency / Preference: ${stdUrgency}
 
 Thank you.`;
 
@@ -134,19 +349,57 @@ Thank you.`;
     window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
   };
 
+  // Handlers food builder submission
+  const handleFoodSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const subject = encodeURIComponent(`New African Food Order Request — ${foodDestination}`);
+    let bodyText = `========= CUSTOMER INFORMATION =========
+Name: ${foodName}
+Email: ${foodEmail}
+Phone Number: ${foodPhone || "Not Provided"}
+Destination: ${foodDestination}
+Delivery Address: ${foodAddress}
+
+========= DYNAMIC GROCERY ITEM LIST =========
+${foodItems.map((item, idx) => {
+  return `${idx + 1}. Item: ${item.name} | Qty: ${item.qty} ${item.unit} | Budget: ${item.budget} | Brand: ${item.brand || "Any"} | Notes: ${item.notes || "None"}`;
+}).join("\n")}
+
+========= DELIVERY & PACKAGING OPTIONS =========
+Delivery Speed: ${deliverySpeed === "priority" ? "Priority Fresh Sourced" : deliverySpeed === "express" ? "Express Air" : "Standard Consolidated"}
+Vacuum Freshness Sealed Protection: ${freshnessProtection ? "YES (Attested)" : "NO"}
+Attached Shopping Lists: ${uploadedFoodFiles.length > 0 ? uploadedFoodFiles.map(f => f.name).join(", ") : "None"}
+
+========= DYNAMIC COST SUMMARY =========
+Estimated Food Retainer Subtotal: $${estimates.subtotal} USD
+Concierge Sourcing Commission (10%): $${estimates.sourcing} USD
+Premium Shipping & Logistics Rate: $${estimates.shipping} USD
+Freshness protection wrapping: $${estimates.wrap} USD
+----------------------------------------
+Estimated Total Retention Deposit: $${estimates.total} USD
+
+---
+Sent via INTMOVE African Groceries Marketplace Console.
+Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const body = encodeURIComponent(bodyText);
+    window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
+
+    localStorage.removeItem("intmove_food_draft");
+    setFoodItems([{ id: "1", name: "", unit: "KG", qty: "1", budget: "$10–$25", brand: "", notes: "" }]);
+    setUploadedFoodFiles([]);
+  };
+
   return (
     <div className="bg-[#0a0a0a] min-h-screen font-sans text-white pb-20 selection:bg-[#D4AF37] selection:text-[#0a0a0a]">
       
-
-
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#0a0a0a]">
         <div className="absolute inset-0 z-0">
-          {/* Animated Background Gradients instead of Image for clean luxury UI */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D4AF37]/10 via-[#0a0a0a] to-[#0a0a0a]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0a0a0a] to-[#0a0a0a]" />
           
-          {/* Animated floating elements */}
           <motion.div 
             animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
@@ -161,14 +414,6 @@ Thank you.`;
             className="absolute bottom-1/3 right-[25%] w-20 h-20 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl hidden lg:flex"
           >
             <Package className="w-8 h-8 text-blue-400" />
-          </motion.div>
-
-          <motion.div 
-            animate={{ y: [0, -15, 0], rotate: [0, 8, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute top-1/3 right-[35%] w-16 h-16 bg-[#D4AF37]/10 backdrop-blur-xl border border-[#D4AF37]/20 rounded-2xl flex items-center justify-center shadow-2xl hidden xl:flex"
-          >
-            <Gift className="w-6 h-6 text-[#D4AF37]" />
           </motion.div>
         </div>
 
@@ -209,7 +454,7 @@ Thank you.`;
               <Link href="#request" className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2 text-lg">
                 Request A Purchase <ArrowRight className="w-5 h-5" />
               </Link>
-              <button className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
+              <button onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))} className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
                 <Truck className="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-transform" /> Get Shipping Estimate
               </button>
             </motion.div>
@@ -220,9 +465,9 @@ Thank you.`;
       {/* Advanced Features Placeholder Banner */}
       <div className="border-y border-white/5 bg-[#111] relative overflow-hidden">
         <div className="container mx-auto max-w-7xl px-6 py-6 flex flex-wrap items-center justify-center gap-12 relative z-10 text-white/50 text-sm font-medium tracking-widest uppercase">
-          <span className="flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors"><Search className="w-4 h-4 text-blue-400" /> AI Product Hunt</span>
-          <span className="flex items-center gap-2 cursor-pointer hover:text-green-400 transition-colors"><CreditCard className="w-4 h-4 text-green-400" /> Smart Currency Converter</span>
-          <span className="flex items-center gap-2 cursor-pointer hover:text-[#D4AF37] transition-colors"><Heart className="w-4 h-4 text-[#D4AF37]" /> Save to Wishlist</span>
+          <span className="flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors"><Search className="w-4 h-4 text-blue-400" /> AI Product Sourcing</span>
+          <span className="flex items-center gap-2 cursor-pointer hover:text-green-400 transition-colors"><CreditCard className="w-4 h-4 text-green-400" /> Dynamic Sourcing Calculator</span>
+          <span className="flex items-center gap-2 cursor-pointer hover:text-[#D4AF37] transition-colors"><Heart className="w-4 h-4 text-[#D4AF37]" /> Sourced With Love</span>
         </div>
       </div>
 
@@ -282,38 +527,35 @@ Thank you.`;
             ))}
           </div>
 
-          {/* Dedicated African Care Package Banner */}
-          <div className="bg-gradient-to-r from-orange-900/40 to-red-900/20 border border-orange-500/20 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl">
+          {/* Dedicated African Sourcing Banner */}
+          <div className="bg-gradient-to-r from-orange-950/40 via-red-950/20 to-yellow-950/10 border border-orange-500/20 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl">
             <div className="absolute right-0 top-0 w-64 h-full bg-orange-500/10 blur-3xl" />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative z-10">
               <div>
                 <div className="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-xs font-bold uppercase backdrop-blur-md border border-orange-500/30 mb-4">
-                  <Heart className="w-3 h-3 fill-orange-400" /> Highly Emotional Service
+                  <Heart className="w-3 h-3 fill-orange-400" /> Taste of Home
                 </div>
-                <h2 className="text-3xl md:text-5xl font-bold mb-4">African Foods & <br/>Care Packages</h2>
-                <p className="text-xl text-white/80 italic font-light mb-6">"A taste of home, delivered worldwide."</p>
+                <h2 className="text-3xl md:text-5xl font-bold mb-4">Authentic African Groceries & Foods</h2>
+                <p className="text-xl text-white/80 italic font-light mb-6">"Home is just one shipment away."</p>
                 <p className="text-white/60 mb-8 leading-relaxed">
-                  For Africans abroad, we source authentic Garri, Egusi, Yam Flour, spices, and local snacks directly from local markets and ship them fresh to your door in the US, UK, or Canada.
+                  For Africans abroad, we source authentic Garri, Egusi, Yam Flour, seasonings, spices, and snacks directly from trusted local markets and ship them fresh to your door in the US, UK, or Canada under tight freshness guarantees.
                 </p>
-                <a href="https://t.me/fenway4u_concierge" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-red-600 hover:to-orange-500 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)]">
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.51-.46-.01-1.33-.26-1.98-.47-.8-.26-1.42-.4-1.36-.85.03-.24.36-.49.99-.75 3.88-1.69 6.46-2.8 7.74-3.32 3.69-1.5 4.45-1.76 4.95-1.77.11 0 .36.03.52.16.13.11.17.26.19.37.01.07.03.22.02.39z"/>
-                  </svg>
-                  Telegram Shopping Concierge
+                <a href="#request" onClick={() => setActiveTab("food-builder")} className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-red-600 hover:to-orange-500 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                  Launch Food Sourcing Builder <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#0a0a0a]/50 backdrop-blur-sm border border-white/10 p-6 rounded-2xl text-center">
                   <Coffee className="w-8 h-8 text-orange-400 mx-auto mb-3" />
-                  <p className="font-bold text-sm text-white/90">Local Snacks & Beverages</p>
+                  <p className="font-bold text-sm text-white/90">Vacuum Sealed Packaging</p>
                 </div>
                 <div className="bg-[#0a0a0a]/50 backdrop-blur-sm border border-white/10 p-6 rounded-2xl text-center">
                   <Package className="w-8 h-8 text-orange-400 mx-auto mb-3" />
-                  <p className="font-bold text-sm text-white/90">Student Survival Boxes</p>
+                  <p className="font-bold text-sm text-white/90">Global Air Freight Route</p>
                 </div>
-                <div className="bg-[#0a0a0a]/50 backdrop-blur-sm border border-white/10 p-6 rounded-2xl text-center col-span-2">
-                  <p className="font-bold text-sm text-white/90 mb-1">International Groceries to Africa</p>
-                  <p className="text-xs text-white/50">Send imported chocolates & baby products back home.</p>
+                <div className="bg-[#0a0a0a]/50 backdrop-blur-sm border border-[#D4AF37]/20 p-6 rounded-2xl text-center col-span-2">
+                  <p className="font-bold text-sm text-[#D4AF37] mb-1">Freshness Protection Guaranteed</p>
+                  <p className="text-xs text-white/50">All food care packages are compiled on shipping day.</p>
                 </div>
               </div>
             </div>
@@ -378,55 +620,506 @@ Thank you.`;
         </div>
       </section>
 
-      {/* Section 5: Live Product Request Form (Sourcing Request Form) */}
+      {/* Section 5: Rebuilt Dual-Tab Sourcing Console */}
       <section id="request" className="py-24 px-6 relative bg-[#0a0a0a]">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] rounded-3xl p-8 md:p-12 border border-[#D4AF37]/30 shadow-[0_0_50px_rgba(212,175,55,0.05)] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
-            
-            <div className="text-center mb-10 relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Live Product Request</h2>
-              <p className="text-white/60">Paste a URL or describe what you need. Our personal shoppers will get you a quote instantly.</p>
-            </div>
-
-            <form onSubmit={handleRequestSubmit} className="space-y-6 relative z-10">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">Product URL or Item Description</label>
-                <textarea rows={3} required className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors resize-none" placeholder="e.g. https://amazon.com/iphone15 OR 'Please source 5 bags of Ijebu Garri...'" />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Destination Country</label>
-                  <select className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors appearance-none">
-                    <option>United States</option>
-                    <option>United Kingdom</option>
-                    <option>Canada</option>
-                    <option>Nigeria / Africa</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Urgency / Shipping Preference</label>
-                  <select className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors appearance-none">
-                    <option>Express Air (Fastest)</option>
-                    <option>Standard Delivery</option>
-                    <option>Sea Freight (Bulk/Cheapest)</option>
-                  </select>
+        <div className="container mx-auto max-w-5xl">
+          
+          {/* Draft Form Recovery Toast Banner */}
+          {restoreDraftAvailable && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-[#111] border border-[#D4AF37]/40 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4"
+            >
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-[#D4AF37] shrink-0" />
+                <div className="text-left">
+                  <h4 className="font-bold text-sm text-white">Unsaved Grocery List Detected</h4>
+                  <p className="text-xs text-white/50 mt-0.5">We found an unsaved draft list in your cache. Would you like to resume?</p>
                 </div>
               </div>
-
-              {/* Fake Upload Area for UI Polish */}
-              <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-white/30 transition-colors cursor-pointer bg-white/5">
-                <UploadCloud className="w-8 h-8 text-white/30 mx-auto mb-2" />
-                <p className="text-sm text-white/50">Upload screenshots of the item (Optional)</p>
+              <div className="flex gap-2">
+                <button onClick={discardFoodDraft} className="text-xs text-white/40 hover:text-white px-3 py-1.5 rounded bg-white/5 border border-white/10 transition-colors">Discard</button>
+                <button onClick={restoreFoodDraft} className="text-xs text-black font-bold px-3 py-1.5 rounded bg-[#D4AF37] hover:bg-[#F3C332] transition-colors">Resume Sourcing List</button>
               </div>
+            </motion.div>
+          )}
 
-              <button type="submit" className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] text-lg flex items-center justify-center gap-2">
-                <Mail className="w-6 h-6" /> Send Purchase Request
-              </button>
-            </form>
+          {/* Form Tabs Controller */}
+          <div className="flex justify-center gap-2 mb-8 bg-[#111]/80 backdrop-blur border border-white/5 rounded-2xl p-1.5 max-w-lg mx-auto">
+            <button 
+              onClick={() => setActiveTab("standard")}
+              className={`flex-1 font-bold text-xs uppercase tracking-widest py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2
+                ${activeTab === "standard" ? 'bg-white/5 border border-white/10 text-white font-extrabold shadow' : 'text-white/40 hover:text-white/60'}`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5 text-[#D4AF37]" /> Standard Purchase
+            </button>
+            <button 
+              onClick={() => setActiveTab("food-builder")}
+              className={`flex-1 font-bold text-xs uppercase tracking-widest py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2
+                ${activeTab === "food-builder" ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 text-white font-extrabold shadow' : 'text-white/40 hover:text-white/60'}`}
+            >
+              <Star className="w-3.5 h-3.5 text-orange-400" /> African Foods Marketplace
+            </button>
           </div>
+
+          <AnimatePresence mode="wait">
+            
+            {/* Standard Sourcing request form */}
+            {activeTab === "standard" && (
+              <motion.div
+                key="standard-form"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="bg-gradient-to-b from-[#111] to-[#0a0a0a] rounded-3xl p-8 md:p-12 border border-[#D4AF37]/30 shadow-[0_0_50px_rgba(212,175,55,0.05)] relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
+                
+                <div className="text-center mb-10 relative z-10">
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">Standard Sourcing Request</h2>
+                  <p className="text-white/60">Paste a URL or describe what you need. Our personal shoppers will get you a quote instantly.</p>
+                </div>
+
+                <form onSubmit={handleRequestSubmit} className="space-y-6 relative z-10">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">Product URL or Item Description</label>
+                    <textarea 
+                      rows={3} 
+                      required 
+                      value={stdDetails}
+                      onChange={(e) => setStdDetails(e.target.value)}
+                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors resize-none" 
+                      placeholder="e.g. https://amazon.com/iphone15 OR 'Please source 5 bags of Ijebu Garri...'" 
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-2">Destination Country</label>
+                      <select 
+                        value={stdDestination}
+                        onChange={(e) => setStdDestination(e.target.value)}
+                        className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors appearance-none"
+                      >
+                        <option>United States</option>
+                        <option>United Kingdom</option>
+                        <option>Canada</option>
+                        <option>Nigeria / Africa</option>
+                        <option>Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-2">Urgency / Shipping Preference</label>
+                      <select 
+                        value={stdUrgency}
+                        onChange={(e) => setStdUrgency(e.target.value)}
+                        className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#D4AF37] transition-colors appearance-none"
+                      >
+                        <option>Express Air (Fastest)</option>
+                        <option>Standard Delivery</option>
+                        <option>Sea Freight (Bulk/Cheapest)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Fake Upload Area for UI Polish */}
+                  <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-white/30 transition-colors cursor-pointer bg-white/5">
+                    <UploadCloud className="w-8 h-8 text-white/30 mx-auto mb-2" />
+                    <p className="text-sm text-white/50">Upload screenshots of the item (Optional)</p>
+                  </div>
+
+                  <button type="submit" className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] text-lg flex items-center justify-center gap-2">
+                    <Mail className="w-6 h-6" /> Send Purchase Request
+                  </button>
+                </form>
+              </motion.div>
+            )}
+
+            {/* Custom Interactive Food Order Builder */}
+            {activeTab === "food-builder" && (
+              <motion.div
+                key="food-form"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="bg-gradient-to-b from-[#111] via-[#0D0B0A] to-[#0a0a0a] rounded-3xl p-6 md:p-10 border border-orange-500/30 shadow-[0_0_50px_rgba(239,68,68,0.05)] relative overflow-hidden"
+              >
+                
+                {/* Traditional Subtle Header Accents */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-[#D4AF37] to-red-600" />
+                
+                <div className="text-center mb-10 relative z-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-semibold uppercase tracking-widest mb-3">
+                    <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> Taste of Home Concierge
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">African Foods Sourcing Builder</h2>
+                  <p className="text-white/60 mt-1 max-w-lg mx-auto text-sm leading-relaxed">
+                    Add traditional items dynamically. Our professional local shoppers source fresh staples directly from trusted local markets.
+                  </p>
+                </div>
+
+                {/* Preset Sourcing Package Buttons */}
+                <div className="mb-8 bg-[#0a0a0a]/50 p-4 border border-white/5 rounded-2xl relative z-20">
+                  <p className="text-[10px] uppercase text-[#D4AF37] font-bold tracking-widest text-left mb-3">One-Click Traditional Preset Packages:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    
+                    <button 
+                      type="button" 
+                      onClick={() => applyPresetList("survival")}
+                      className="p-3 text-left bg-gradient-to-br from-white/5 to-[#0F0B0A] border border-white/10 hover:border-orange-500/40 rounded-xl transition-all duration-300 group"
+                    >
+                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-red-400" /> Student Survival Box</h4>
+                      <p className="text-[9px] text-white/50 mt-1 leading-normal">Indomie Noodles, sour Ijebu Garri, Kano Suya Spice, crunchy Plantain Chips.</p>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onClick={() => applyPresetList("tasteOfHome")}
+                      className="p-3 text-left bg-gradient-to-br from-white/5 to-[#0F0B0A] border border-white/10 hover:border-orange-500/40 rounded-xl transition-all duration-300 group"
+                    >
+                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-orange-400" /> Taste of Home Package</h4>
+                      <p className="text-[9px] text-white/50 mt-1 leading-normal">Egusi (Melon Seeds), Honeywell Poundo Yam, Nsukka Palm Oil, smoked dry Catfish.</p>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onClick={() => applyPresetList("familyBundle")}
+                      className="p-3 text-left bg-gradient-to-br from-white/5 to-[#0F0B0A] border border-white/10 hover:border-orange-500/40 rounded-xl transition-all duration-300 group"
+                    >
+                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-yellow-400" /> Family Grocery Bundle</h4>
+                      <p className="text-[9px] text-white/50 mt-1 leading-normal">Bulk White Garri, Elubo (Yam Flour), blended Oron Crayfish, pure Nsukka Palm Oil.</p>
+                    </button>
+
+                  </div>
+                </div>
+
+                <form onSubmit={handleFoodSubmit} className="space-y-6 relative z-10">
+                  
+                  {/* DYNAMIC FOOD BUILDER ITEM LIST */}
+                  <div className="space-y-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-white/60 text-left">Your Grocery Sourcing List:</p>
+                    
+                    <div className="space-y-3">
+                      {foodItems.map((item, index) => (
+                        <div key={item.id} className="relative bg-[#0a0a0a] border border-white/10 p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center transition-all hover:border-orange-500/30">
+                          
+                          {/* Item number */}
+                          <span className="text-[10px] text-orange-400 font-bold shrink-0 bg-orange-500/10 w-6 h-6 rounded-full flex items-center justify-center border border-orange-500/20">{index + 1}</span>
+
+                          {/* Food Name (with absolute Autocomplete popup) */}
+                          <div className="flex-1 w-full relative">
+                            <label className="block text-[9px] font-bold uppercase text-white/40 mb-1 text-left">Food Item Name *</label>
+                            <input 
+                              type="text" 
+                              required
+                              value={item.name}
+                              onFocus={() => setFocusedRowId(item.id)}
+                              onBlur={() => setTimeout(() => setFocusedRowId(null), 200)}
+                              onChange={(e) => handleRowChange(item.id, "name", e.target.value)}
+                              placeholder="e.g. Garri, Egusi, Palm Oil" 
+                              className="w-full bg-[#111] border border-white/5 focus:border-orange-400 rounded-xl px-3 py-2 text-xs text-white outline-none transition-colors"
+                            />
+
+                            {/* Autocomplete suggestions list */}
+                            {focusedRowId === item.id && (
+                              <div className="absolute left-0 right-0 top-[52px] z-50 bg-[#111] border border-white/10 rounded-xl shadow-2xl p-2 max-h-[140px] overflow-y-auto flex flex-col text-left">
+                                {commonTraditionalStaples
+                                  .filter(s => s.toLowerCase().includes(item.name.toLowerCase()))
+                                  .map(matchedStaple => (
+                                    <button
+                                      key={matchedStaple}
+                                      type="button"
+                                      onClick={() => handleRowChange(item.id, "name", matchedStaple)}
+                                      className="w-full text-[10px] text-white/70 hover:text-white hover:bg-orange-500/10 p-2 rounded text-left transition-colors"
+                                    >
+                                      {matchedStaple}
+                                    </button>
+                                  ))
+                                }
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Quantity inputs */}
+                          <div className="w-full md:w-[130px] grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-[9px] font-bold uppercase text-white/40 mb-1 text-left">Qty *</label>
+                              <input 
+                                type="number" 
+                                required
+                                min="1"
+                                value={item.qty}
+                                onChange={(e) => handleRowChange(item.id, "qty", e.target.value)}
+                                className="w-full bg-[#111] border border-white/5 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[9px] font-bold uppercase text-white/40 mb-1 text-left">Unit</label>
+                              <select 
+                                value={item.unit}
+                                onChange={(e) => handleRowChange(item.id, "unit", e.target.value)}
+                                className="w-full bg-[#111] border border-white/5 rounded-xl p-2 text-xs text-white appearance-none"
+                              >
+                                <option>KG</option>
+                                <option>Grams</option>
+                                <option>Liters</option>
+                                <option>Packs</option>
+                                <option>Cartons</option>
+                                <option>Pieces</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Budget Selection */}
+                          <div className="w-full md:w-[120px]">
+                            <label className="block text-[9px] font-bold uppercase text-white/40 mb-1 text-left">Price Tier *</label>
+                            <select 
+                              value={item.budget}
+                              onChange={(e) => handleRowChange(item.id, "budget", e.target.value)}
+                              className="w-full bg-[#111] border border-white/5 rounded-xl p-2 text-xs text-white appearance-none"
+                            >
+                              <option value="$10–$25">$10–$25</option>
+                              <option value="$25–$50">$25–$50</option>
+                              <option value="$50–$100">$50–$100</option>
+                            </select>
+                          </div>
+
+                          {/* Brand preference */}
+                          <div className="w-full md:w-[140px]">
+                            <label className="block text-[9px] font-bold uppercase text-white/40 mb-1 text-left">Brand Preference</label>
+                            <input 
+                              type="text" 
+                              value={item.brand}
+                              onChange={(e) => handleRowChange(item.id, "brand", e.target.value)}
+                              placeholder="e.g. Honeywell (optional)" 
+                              className="w-full bg-[#111] border border-white/5 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                            />
+                          </div>
+
+                          {/* Action Button */}
+                          <button 
+                            type="button" 
+                            onClick={() => removeFoodItemRow(item.id)}
+                            disabled={foodItems.length === 1}
+                            className="text-white/30 hover:text-red-400 transition-colors p-2 rounded-xl mt-3 md:mt-2.5 disabled:opacity-20 shrink-0 self-center"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+
+                        </div>
+                      ))}
+                    </div>
+
+                    <button 
+                      type="button" 
+                      onClick={addFoodItemRow}
+                      className="inline-flex items-center gap-1.5 text-xs text-orange-400 hover:text-[#D4AF37] font-bold transition-colors py-1 relative z-20"
+                    >
+                      <PlusCircle className="w-4 h-4" /> + Add Food Item Row
+                    </button>
+                  </div>
+
+                  {/* Customer Information Grid */}
+                  <div className="bg-[#0a0a0a] border border-white/10 p-5 rounded-2xl space-y-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#D4AF37] text-left">Recipient Profile & Address Details:</p>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-white/50 mb-1 text-left">Full Name *</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={foodName}
+                          onChange={(e) => setFoodName(e.target.value)}
+                          placeholder="Your Name" 
+                          className="w-full bg-[#111] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-white/50 mb-1 text-left">Email Address *</label>
+                        <input 
+                          type="email" 
+                          required
+                          value={foodEmail}
+                          onChange={(e) => setFoodEmail(e.target.value)}
+                          placeholder="you@example.com" 
+                          className="w-full bg-[#111] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-white/50 mb-1 text-left">Phone Number *</label>
+                        <input 
+                          type="tel" 
+                          required
+                          value={foodPhone}
+                          onChange={(e) => setFoodPhone(e.target.value)}
+                          placeholder="+1 (555) 000-0000" 
+                          className="w-full bg-[#111] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-orange-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-white/50 mb-1 text-left">Destination Country *</label>
+                        <select 
+                          value={foodDestination}
+                          onChange={(e) => setFoodDestination(e.target.value)}
+                          className="w-full bg-[#111] border border-white/5 rounded-xl p-2.5 text-xs text-white appearance-none"
+                        >
+                          <option>United States</option>
+                          <option>United Kingdom</option>
+                          <option>Canada</option>
+                        </select>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-[10px] font-semibold text-white/50 mb-1 text-left">Full Delivery Address *</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={foodAddress}
+                          onChange={(e) => setFoodAddress(e.target.value)}
+                          placeholder="Street, City, State, ZIP/Postal Code" 
+                          className="w-full bg-[#111] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-orange-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Delivery Speed, Freshness Wrap, and Sourcing Upload */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <div className="bg-[#0a0a0a] border border-white/10 p-5 rounded-2xl space-y-4">
+                      <p className="text-xs font-bold uppercase tracking-wider text-white/70 text-left">Freshness Preservation & Priority Options:</p>
+                      
+                      {/* Priority select */}
+                      <div>
+                        <label className="block text-[10px] font-semibold text-white/50 mb-2 text-left">Logistics Timeline Speed</label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setDeliverySpeed("standard")}
+                            className={`flex-1 p-2 rounded-xl border text-[10px] font-bold transition-all
+                              ${deliverySpeed === "standard" ? 'bg-white/5 border-white/30 text-white' : 'bg-[#111] border-transparent text-white/40'}`}
+                          >
+                            Consolidated Sea ($45)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeliverySpeed("express")}
+                            className={`flex-1 p-2 rounded-xl border text-[10px] font-bold transition-all
+                              ${deliverySpeed === "express" ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' : 'bg-[#111] border-transparent text-white/40'}`}
+                          >
+                            Express Air ($85)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeliverySpeed("priority")}
+                            className={`flex-1 p-2 rounded-xl border text-[10px] font-bold transition-all
+                              ${deliverySpeed === "priority" ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-[#111] border-transparent text-white/40'}`}
+                          >
+                            Fresh Priority ($120)
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Freshness Switch */}
+                      <button
+                        type="button"
+                        onClick={() => setFreshnessProtection(!freshnessProtection)}
+                        className={`w-full flex items-center justify-between p-3.5 rounded-xl border text-left transition-all duration-300
+                          ${freshnessProtection 
+                            ? 'bg-orange-500/10 border-orange-500/40 text-white' 
+                            : 'bg-[#111] border-white/5 text-white/40'}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className={`w-4 h-4 shrink-0 ${freshnessProtection ? 'text-orange-400' : 'text-white/20'}`} />
+                          <div>
+                            <p className="text-xs font-bold">Vacuum-Sealed Freshness Protection</p>
+                            <p className="text-[8px] text-white/40">Includes oxygen absorbs & temperature cooling wraps (+$25)</p>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold">{freshnessProtection ? "Enabled" : "Disabled"}</span>
+                      </button>
+                    </div>
+
+                    {/* Drag and Drop list upload */}
+                    <div 
+                      onDragEnter={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDragOver={handleDrag}
+                      onDrop={handleDrop}
+                      className={`border-2 border-dashed rounded-2xl p-5 text-center flex flex-col justify-center cursor-pointer transition-colors relative bg-white/3
+                        ${isDragActive ? 'border-orange-400 bg-orange-500/5' : 'border-white/10 hover:border-white/20'}`}
+                    >
+                      <input 
+                        type="file" 
+                        multiple 
+                        onChange={handleFileInput}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <UploadCloud className="w-8 h-8 text-orange-400 mx-auto mb-1.5" />
+                      <p className="text-xs text-white/80 font-bold mb-0.5">Drag list screenshot or handwritten checklist here</p>
+                      <p className="text-[9px] text-white/40">Saves time. PDF/PNG up to 10MB.</p>
+
+                      {/* Upload files feedback */}
+                      {uploadedFoodFiles.length > 0 && (
+                        <div className="mt-3 space-y-1 relative z-20">
+                          {uploadedFoodFiles.map(f => (
+                            <div key={f.name} className="flex justify-between items-center text-[10px] bg-[#0a0a0a] border border-white/10 p-1.5 rounded-lg text-white">
+                              <span className="truncate max-w-[120px] font-mono">{f.name}</span>
+                              <span className="font-mono text-[#D4AF37]">{f.completed ? "Attracted" : `${f.progress}%`}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+
+                  {/* Live order cost estimate panel */}
+                  <div className="bg-[#0D0B0A] border border-orange-500/20 p-6 rounded-2xl shadow-xl relative overflow-hidden text-left">
+                    <div className="absolute top-0 right-0 w-32 h-full bg-orange-500/5 blur-2xl pointer-events-none" />
+                    <h4 className="text-xs font-bold text-white/50 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-[#D4AF37]" /> Live Grocery Estimate Summary
+                    </h4>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-white/5 pb-4 mb-4 text-xs text-white/70">
+                      <div>
+                        <p className="text-[10px] uppercase text-white/40">Food Subtotal</p>
+                        <p className="font-bold text-white mt-1">${estimates.subtotal} USD</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase text-white/40">Concierge Fee (10%)</p>
+                        <p className="font-bold text-white mt-1">${estimates.sourcing} USD</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase text-white/40">Air/Ocean Shipping</p>
+                        <p className="font-bold text-white mt-1">${estimates.shipping} USD</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase text-white/40">Freshness Wrapping</p>
+                        <p className="font-bold text-white mt-1">${estimates.wrap} USD</p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-white">
+                      <span className="font-bold text-sm tracking-wide">Estimated Retainer Deposit</span>
+                      <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-[#D4AF37] font-mono">
+                        ${estimates.total} USD
+                      </span>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="w-full bg-gradient-to-r from-orange-500 via-[#D4AF37] to-red-600 hover:from-red-600 hover:to-orange-500 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(239,68,68,0.2)] text-lg flex items-center justify-center gap-2">
+                    <Mail className="w-6 h-6" /> Sourced via Email
+                  </button>
+                </form>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
         </div>
       </section>
 

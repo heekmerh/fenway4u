@@ -145,7 +145,7 @@ export default function ShopForMePage() {
 
   // Food Builder State
   const [foodItems, setFoodItems] = useState<FoodItem[]>([
-    { id: "1", name: "", unit: "KG", qty: "1", budget: "$10–$25", brand: "", notes: "" }
+    { id: "1", name: "", unit: "KG", qty: "1", budget: "$10–$15", brand: "", notes: "" }
   ]);
   const [foodName, setFoodName] = useState("");
   const [foodEmail, setFoodEmail] = useState("");
@@ -171,29 +171,29 @@ export default function ShopForMePage() {
   // Preset package templates
   const presets = {
     survival: [
-      { id: "s1", name: "Indomie Noodles", unit: "Cartons", qty: "1", budget: "$25–$50", brand: "Dufil Prima", notes: "Chicken flavor preferred" },
-      { id: "s2", name: "Ijebu Garri", unit: "KG", qty: "5", budget: "$10–$25", brand: "Local Market", notes: "Extra sour" },
-      { id: "s3", name: "Suya Spice", unit: "Packs", qty: "3", budget: "$10–$25", brand: "Kano Sourced", notes: "Mild hotness" },
-      { id: "s4", name: "Plantain Chips", unit: "Packs", qty: "10", budget: "$10–$25", brand: "Premium Sourced", notes: "Lightly salted" }
+      { id: "s1", name: "Indomie Noodles", unit: "Cartons", qty: "1", budget: "$25–$30", brand: "Dufil Prima", notes: "Chicken flavor preferred" },
+      { id: "s2", name: "Ijebu Garri", unit: "KG", qty: "5", budget: "$10–$15", brand: "Local Market", notes: "Extra sour" },
+      { id: "s3", name: "Suya Spice", unit: "Packs", qty: "3", budget: "$10–$15", brand: "Kano Sourced", notes: "Mild hotness" },
+      { id: "s4", name: "Plantain Chips", unit: "Packs", qty: "10", budget: "$10–$15", brand: "Premium Sourced", notes: "Lightly salted" }
     ],
     tasteOfHome: [
-      { id: "t1", name: "Egusi (Melon Seed)", unit: "KG", qty: "2", budget: "$10–$25", brand: "Hand-peeled local", notes: "Un-grounded preferred" },
-      { id: "t2", name: "Poundo Yam", unit: "KG", qty: "4", budget: "$10–$25", brand: "Honeywell Brand", notes: "Sourced fresh" },
-      { id: "t3", name: "Palm Oil", unit: "Liters", qty: "3", budget: "$10–$25", brand: "Nsukka Premium", notes: "Pure extraction" },
-      { id: "t4", name: "Dried Fish (Catfish)", unit: "Pieces", qty: "5", budget: "$25–$50", brand: "Epe Market Sourced", notes: "Smoked bone-dry" }
+      { id: "t1", name: "Egusi (Melon Seed)", unit: "KG", qty: "2", budget: "$10–$15", brand: "Hand-peeled local", notes: "Un-grounded preferred" },
+      { id: "t2", name: "Poundo Yam", unit: "KG", qty: "4", budget: "$10–$15", brand: "Honeywell Brand", notes: "Sourced fresh" },
+      { id: "t3", name: "Palm Oil", unit: "Liters", qty: "3", budget: "$10–$15", brand: "Nsukka Premium", notes: "Pure extraction" },
+      { id: "t4", name: "Dried Fish (Catfish)", unit: "Pieces", qty: "5", budget: "$25–$30", brand: "Epe Market Sourced", notes: "Smoked bone-dry" }
     ],
     familyBundle: [
       { id: "f1", name: "White Garri", unit: "KG", qty: "20", budget: "$50–$100", brand: "Bulk Sourced", notes: "Sieved clean" },
-      { id: "f2", name: "Elubo (Yam Flour)", unit: "KG", qty: "10", budget: "$25–$50", brand: "Local Sourced", notes: "For Amala" },
-      { id: "f3", name: "Crayfish", unit: "Packs", qty: "5", budget: "$10–$25", brand: "Oron Premium", notes: "Blended clean" },
-      { id: "f4", name: "Palm Oil", unit: "Liters", qty: "5", budget: "$25–$50", brand: "Nsukka Brand", notes: "Aviation approved cans" }
+      { id: "f2", name: "Elubo (Yam Flour)", unit: "KG", qty: "10", budget: "$25–$30", brand: "Local Sourced", notes: "For Amala" },
+      { id: "f3", name: "Crayfish", unit: "Packs", qty: "5", budget: "$10–$15", brand: "Oron Premium", notes: "Blended clean" },
+      { id: "f4", name: "Palm Oil", unit: "Liters", qty: "5", budget: "$25–$30", brand: "Nsukka Brand", notes: "Aviation approved cans" }
     ]
   };
 
   // Add Item row
   const addFoodItemRow = () => {
     const newId = (foodItems.length + 1).toString();
-    setFoodItems([...foodItems, { id: newId, name: "", unit: "KG", qty: "1", budget: "$10–$25", brand: "", notes: "" }]);
+    setFoodItems([...foodItems, { id: newId, name: "", unit: "KG", qty: "1", budget: "$10–$15", brand: "", notes: "" }]);
   };
 
   // Remove Item row
@@ -304,11 +304,20 @@ export default function ShopForMePage() {
   const calculateFoodEstimate = () => {
     let itemsSubtotal = 0;
     foodItems.forEach(item => {
-      let itemBudgetAvg = 15;
-      if (item.budget === "$10–$25") itemBudgetAvg = 17.5;
-      else if (item.budget === "$25–$50") itemBudgetAvg = 37.5;
+      let itemBudgetAvg = 12.5;
+      if (item.budget === "$1–$5") itemBudgetAvg = 3;
+      else if (item.budget === "$5–$10") itemBudgetAvg = 7.5;
+      else if (item.budget === "$10–$15") itemBudgetAvg = 12.5;
+      else if (item.budget === "$15–$20") itemBudgetAvg = 17.5;
+      else if (item.budget === "$20–$25") itemBudgetAvg = 22.5;
+      else if (item.budget === "$25–$30") itemBudgetAvg = 27.5;
+      else if (item.budget === "$30–$35") itemBudgetAvg = 32.5;
+      else if (item.budget === "$35–$40") itemBudgetAvg = 37.5;
+      else if (item.budget === "$40–$45") itemBudgetAvg = 42.5;
+      else if (item.budget === "$45–$50") itemBudgetAvg = 47.5;
       else if (item.budget === "$50–$100") itemBudgetAvg = 75;
-      else itemBudgetAvg = 20;
+      else if (item.budget === "$100–$200") itemBudgetAvg = 150;
+      else itemBudgetAvg = 12.5;
 
       const qty = parseFloat(item.qty) || 1;
       itemsSubtotal += itemBudgetAvg * qty;
@@ -912,9 +921,18 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
                               onChange={(e) => handleRowChange(item.id, "budget", e.target.value)}
                               className="w-full bg-[#111] border border-white/5 rounded-xl p-2 text-xs text-white appearance-none"
                             >
-                              <option value="$10–$25">$10–$25</option>
-                              <option value="$25–$50">$25–$50</option>
+                              <option value="$1–$5">$1–$5</option>
+                              <option value="$5–$10">$5–$10</option>
+                              <option value="$10–$15">$10–$15</option>
+                              <option value="$15–$20">$15–$20</option>
+                              <option value="$20–$25">$20–$25</option>
+                              <option value="$25–$30">$25–$30</option>
+                              <option value="$30–$35">$30–$35</option>
+                              <option value="$35–$40">$35–$40</option>
+                              <option value="$40–$45">$40–$45</option>
+                              <option value="$45–$50">$45–$50</option>
                               <option value="$50–$100">$50–$100</option>
+                              <option value="$100–$200">$100–$200</option>
                             </select>
                           </div>
 

@@ -28,28 +28,32 @@ const whatWeBuy = [
     desc: "iPhones, gaming consoles, laptops, and smart TVs.", 
     icon: Smartphone,
     color: "from-blue-500/20 to-cyan-500/5",
-    border: "group-hover:border-blue-500/50"
+    border: "group-hover:border-blue-500/50",
+    image: "/images/tech_gadget_sourcing.png"
   },
   { 
     title: "Vehicles & Car Parts", 
     desc: "Auction vehicles, luxury cars, and hard-to-find auto parts.", 
     icon: Car,
     color: "from-purple-500/20 to-fuchsia-500/5",
-    border: "group-hover:border-purple-500/50"
+    border: "group-hover:border-purple-500/50",
+    image: "/images/car_auction_1_1778971403142.png"
   },
   { 
     title: "Fashion & Luxury Goods", 
     desc: "Designer stores, outlet malls, and luxury brand sourcing.", 
     icon: Shirt,
     color: "from-[#D4AF37]/20 to-yellow-500/5",
-    border: "group-hover:border-[#D4AF37]/50"
+    border: "group-hover:border-[#D4AF37]/50",
+    image: "/images/luxury_fashion_sourcing.png"
   },
   { 
     title: "Furniture & Home", 
     desc: "Office furniture, luxury home décor, and kitchen appliances.", 
     icon: Compass,
     color: "from-emerald-500/20 to-teal-500/5",
-    border: "group-hover:border-emerald-500/50"
+    border: "group-hover:border-emerald-500/50",
+    image: "/images/sea_freight_test_1_1779128965828.png"
   }
 ];
 
@@ -397,8 +401,16 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#0a0a0a]">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D4AF37]/10 via-[#0a0a0a] to-[#0a0a0a]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0a0a0a] to-[#0a0a0a]" />
+          <Image 
+            src="/images/shop_for_me_hero.png" 
+            alt="Shop For Me Sourcing" 
+            fill 
+            priority
+            className="object-cover opacity-20 pointer-events-none mix-blend-screen"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/50 via-[#0a0a0a] to-[#0a0a0a]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#D4AF37]/15 via-[#0a0a0a]/90 to-[#0a0a0a]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-blue-950/20 via-[#0a0a0a]/90 to-[#0a0a0a]" />
           
           <motion.div 
             animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
@@ -517,12 +529,26 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className={`bg-[#0a0a0a] p-8 rounded-3xl border border-white/5 transition-all group relative overflow-hidden ${item.border}`}
+                className={`bg-[#0a0a0a] rounded-3xl border border-white/5 transition-all group relative overflow-hidden flex flex-col ${item.border}`}
               >
-                <div className={`absolute -inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-100 transition-opacity`} />
-                <item.icon className="w-10 h-10 text-white/80 group-hover:text-white mb-6 relative z-10 transition-colors" />
-                <h3 className="text-xl font-bold mb-3 relative z-10">{item.title}</h3>
-                <p className="text-white/50 leading-relaxed text-sm relative z-10">{item.desc}</p>
+                <div className="relative h-48 w-full overflow-hidden">
+                  <Image 
+                    src={item.image} 
+                    alt={item.title} 
+                    fill 
+                    className="object-cover group-hover:scale-110 transition-transform duration-500" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/30 to-transparent" />
+                  <div className="absolute top-4 left-4 w-10 h-10 bg-[#0a0a0a]/60 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10">
+                    <item.icon className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col justify-between relative z-10">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-white">{item.title}</h3>
+                    <p className="text-white/50 leading-relaxed text-xs">{item.desc}</p>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -544,18 +570,25 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
                   Launch Food Sourcing Builder <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#0a0a0a]/50 backdrop-blur-sm border border-white/10 p-6 rounded-2xl text-center">
-                  <Coffee className="w-8 h-8 text-orange-400 mx-auto mb-3" />
-                  <p className="font-bold text-sm text-white/90">Vacuum Sealed Packaging</p>
-                </div>
-                <div className="bg-[#0a0a0a]/50 backdrop-blur-sm border border-white/10 p-6 rounded-2xl text-center">
-                  <Package className="w-8 h-8 text-orange-400 mx-auto mb-3" />
-                  <p className="font-bold text-sm text-white/90">Global Air Freight Route</p>
-                </div>
-                <div className="bg-[#0a0a0a]/50 backdrop-blur-sm border border-[#D4AF37]/20 p-6 rounded-2xl text-center col-span-2">
-                  <p className="font-bold text-sm text-[#D4AF37] mb-1">Freshness Protection Guaranteed</p>
-                  <p className="text-xs text-white/50">All food care packages are compiled on shipping day.</p>
+              <div className="relative h-[350px] lg:h-[450px] w-full rounded-3xl overflow-hidden border border-orange-500/20 group shadow-2xl">
+                <Image 
+                  src="/images/african_groceries_banner.png" 
+                  alt="Authentic African Groceries" 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/90 via-[#0a0a0a]/30 to-transparent" />
+                
+                {/* Floating Info Grid Overlay */}
+                <div className="absolute bottom-6 left-6 right-6 grid grid-cols-2 gap-4">
+                  <div className="bg-[#0a0a0a]/85 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center shadow-lg">
+                    <Coffee className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+                    <p className="font-bold text-xs text-white/90">Vacuum Sealed Protection</p>
+                  </div>
+                  <div className="bg-[#0a0a0a]/85 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center shadow-lg">
+                    <Package className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+                    <p className="font-bold text-xs text-white/90">Global Air Freight Sourcing</p>
+                  </div>
                 </div>
               </div>
             </div>

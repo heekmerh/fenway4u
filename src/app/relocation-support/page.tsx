@@ -133,6 +133,12 @@ Thank you.`;
         <div className="absolute inset-0 z-0">
           {/* Premium CSS Gradient Background */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/30 via-[#020617] to-[#020617]" />
+          <Image 
+            src="/images/hero_relocation_support_1778967828049.png" 
+            alt="International relocation support" 
+            fill 
+            className="object-cover opacity-20 pointer-events-none mix-blend-screen"
+          />
           
           {/* Animated Travel Routes / Glowing indicators */}
           <motion.div 

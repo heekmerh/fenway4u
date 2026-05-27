@@ -121,14 +121,14 @@ Thank you.`;
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#030712]">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-transparent to-[#030712]" />
           <Image 
             src="/images/hero_electronics_shipping_1779126332225.png" 
             alt="Secure electronics warehouse" 
             fill 
-            className="object-cover opacity-30 object-center mix-blend-screen"
+            className="object-cover opacity-25 object-center mix-blend-screen pointer-events-none"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#030712] via-transparent to-[#030712]" />
           
           {/* Animated Scanning Line */}
           <motion.div 

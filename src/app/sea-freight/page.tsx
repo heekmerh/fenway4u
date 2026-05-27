@@ -133,14 +133,14 @@ Thank you.`;
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#020617]">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/50 to-transparent" />
           <Image 
             src="/images/hero_sea_freight_1779128923450.png" 
             alt="Massive cargo container ship" 
             fill 
-            className="object-cover opacity-50 mix-blend-screen object-center"
+            className="object-cover opacity-35 mix-blend-screen object-center pointer-events-none"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/50 to-transparent" />
           
           {/* Animated Water Reflection / Glowing elements */}
           <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-blue-900/20 to-transparent blur-3xl mix-blend-screen" />

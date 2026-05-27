@@ -137,13 +137,13 @@ export default function WorkPermitPage() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden px-6">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#040814] via-[#040814]/85 to-[#040814]" />
           <Image 
             src="/images/hero_work_permit_1778965659907.png" 
             alt="Corporate Professionals" 
             fill 
-            className="object-cover opacity-20 object-top"
+            className="object-cover opacity-25 object-top pointer-events-none mix-blend-screen"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#040814] via-[#040814]/80 to-[#040814]" />
         </div>
 
         <div className="container mx-auto max-w-7xl relative z-10 text-center">

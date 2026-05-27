@@ -126,13 +126,13 @@ export default function StudyVisaPage() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden px-6">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0B132B] via-[#0B132B]/85 to-[#0B132B]" />
           <Image 
             src="/images/hero_study_abroad_1778964865442.png" 
             alt="International Student" 
             fill 
-            className="object-cover opacity-20 object-top"
+            className="object-cover opacity-25 object-top pointer-events-none mix-blend-screen"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0B132B] via-[#0B132B]/80 to-[#0B132B]" />
         </div>
 
         <div className="container mx-auto max-w-7xl relative z-10 text-center">

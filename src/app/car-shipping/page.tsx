@@ -410,14 +410,14 @@ Thank you.`;
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505]" />
           <Image 
             src="/images/hero_car_shipping_1778971391359.png" 
             alt="Luxury cars on container ship" 
             fill 
-            className="object-cover opacity-30 object-center"
+            className="object-cover opacity-20 object-center pointer-events-none"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505]" />
         </div>
 
         <div className="container mx-auto max-w-7xl relative z-10 text-center lg:text-left">

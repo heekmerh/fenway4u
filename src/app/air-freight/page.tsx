@@ -123,14 +123,14 @@ Thank you.`;
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#020617]">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-transparent to-[#020617]/50" />
           <Image 
             src="/images/hero_air_freight_1779128222057.png" 
             alt="Cargo aircraft loading at night" 
             fill 
-            className="object-cover opacity-40 mix-blend-screen"
+            className="object-cover opacity-30 mix-blend-screen pointer-events-none"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-transparent to-[#020617]/50" />
           
           {/* Animated Flight Path lines */}
           <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">

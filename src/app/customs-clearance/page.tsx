@@ -140,13 +140,13 @@ Thank you.`;
       {/* Hero Section */}
       <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36 overflow-hidden px-6 bg-[#0f1115]">
         <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-[#0f1115]/80 to-transparent" />
           <Image 
             src="/images/hero_customs_1779129505412.png" 
             alt="Digital Customs Dashboard at Port" 
             fill 
-            className="object-cover opacity-40 mix-blend-screen"
+            className="object-cover opacity-35 mix-blend-screen pointer-events-none"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-[#0f1115]/80 to-transparent" />
           
           {/* Animated Scanning Line */}
           <motion.div 

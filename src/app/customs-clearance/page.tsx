@@ -143,7 +143,7 @@ Thank you.`;
           <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115] via-[#0f1115]/80 to-transparent" />
           <Image 
             src="/images/hero_customs_1779129505412.png" 
-            alt="Digital Customs Dashboard at Port" 
+            alt="Digital Customs Tracking Portal at Port" 
             fill 
             className="object-cover opacity-35 mix-blend-screen pointer-events-none"
           />
@@ -272,7 +272,7 @@ Thank you.`;
         </div>
       </section>
 
-      {/* Section 8: Tracking & Status Updates Dashboard */}
+      {/* Section 8: Tracking & Status Updates Portal */}
       <section className="py-24 px-6 bg-[#171A21] border-y border-white/5 relative overflow-hidden">
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -280,7 +280,7 @@ Thank you.`;
             <div className="lg:col-span-5">
               <h2 className="text-3xl md:text-5xl font-bold mb-6">Real-Time <br/><span className="text-blue-400">Clearance Tracking</span></h2>
               <p className="text-white/60 text-lg mb-8 leading-relaxed font-light">
-                No more guessing. Our premium digital dashboard provides transparent, milestone-by-milestone updates on your cargo's customs status.
+                No more guessing. Our premium digital tracking portal provides transparent, milestone-by-milestone updates on your cargo's customs status.
               </p>
               <ul className="space-y-4">
                 <li className="flex items-center gap-3 text-white/80"><CheckCircle className="w-5 h-5 text-blue-400" /> Instant SMS & Email Notifications</li>

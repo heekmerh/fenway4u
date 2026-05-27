@@ -307,7 +307,7 @@ Thank you.`;
         </div>
       </section>
 
-      {/* Section 8 & 7: Tracking Dashboard UI & Global Map */}
+      {/* Section 8 & 7: Tracking Portal UI & Global Map */}
       <section className="py-24 px-6 bg-[#0A0F1C] border-y border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-10">
           <Map className="w-full h-full text-white" strokeWidth={0.5} />
@@ -318,7 +318,7 @@ Thank you.`;
           </div>
           
           <div className="bg-[#020617] border border-white/10 rounded-3xl p-8 shadow-2xl">
-            {/* Dashboard Header */}
+            {/* Portal Header */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-white/10 pb-6">
               <div className="flex items-center gap-4">
                 <PlaneTakeoff className="w-8 h-8 text-[#D4AF37]" />
@@ -332,7 +332,7 @@ Thank you.`;
               </div>
             </div>
 
-            {/* Dashboard Tracking Milestones */}
+            {/* Portal Tracking Milestones */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
               <div className="hidden md:block absolute top-1/2 left-0 w-full h-[2px] bg-white/10 -translate-y-1/2 -z-0" />
               <div className="hidden md:block absolute top-1/2 left-0 w-[40%] h-[2px] bg-[#D4AF37] -translate-y-1/2 shadow-[0_0_10px_rgba(212,175,55,0.8)] -z-0" />

@@ -39,7 +39,7 @@ const plans = [
     bgAccent: "from-orange-600/15 to-red-500/5",
     buttonAccent: "bg-gradient-to-r from-orange-500 to-red-650 hover:from-red-650 hover:to-orange-500 text-white shadow-[0_0_25px_rgba(249,115,22,0.4)]",
     items: ["Bulk White/Yellow Garri (5KG)", "Family Sized Egusi & Soup Prep", "Nsukka Palm Oil (3 Liters)", "Vacuum Sealed Smoked Fish & Snails", "Consolidated Shopping Sourcing"],
-    features: ["2 Flexible Shipments Monthly", "Free Package Consolidation", "Priority Sourcing Dashboard Queue", "Dedicated Telegram Sourcing Channel"]
+    features: ["2 Flexible Shipments Monthly", "Free Package Consolidation", "Priority Sourcing Premium Queue", "Dedicated Telegram Sourcing Channel"]
   },
   {
     id: "luxury",
@@ -128,9 +128,9 @@ const testimonials = [
 
 const faqs = [
   { q: "How do monthly subscriptions work?", a: "Once you choose a membership plan, you establish a recurring schedule (typically monthly). You fill your virtual subscription box with items. We bill automatically, procure the items fresh on your scheduled shipment day, and ship them internationally with full tracking support." },
-  { q: "Can I edit my subscription list between deliveries?", a: "Absolutely. You can log into your simulated dashboard on this page or email/message us to customize, swap, add, or delete products up to 72 hours before your recurring packing day." },
+  { q: "Can I edit my subscription list between deliveries?", a: "Absolutely. You can log into your simulated subscriber portal on this page or email/message us to customize, swap, add, or delete products up to 72 hours before your recurring packing day." },
   { q: "How are food items packed for long journeys?", a: "All fresh and dry food items undergo high-pressure vaccum sealing. This prevents oxygen flow, preserves taste, eliminates smells, and complies with international export safety regulations." },
-  { q: "Can I pause or cancel my subscription?", a: "Yes. Sourcing memberships have zero long-term commitments. You can pause, skip, or cancel your scheduled delivery instantly from your dashboard or by chatting with our Telegram support." }
+  { q: "Can I pause or cancel my subscription?", a: "Yes. Sourcing memberships have zero long-term commitments. You can pause, skip, or cancel your scheduled delivery instantly from your subscriber portal or by chatting with our Telegram support." }
 ];
 
 interface GroceryRow {
@@ -161,9 +161,9 @@ export default function SubscriptionsPage() {
   const [customUnit, setCustomUnit] = useState("KG");
   const [customFreq, setCustomFreq] = useState("Every Month");
 
-  // Simulated Dashboard State
+  // Simulated Portal State
   const [isPaused, setIsPaused] = useState(false);
-  const [dashboardStatus, setDashboardStatus] = useState("Active");
+  const [portalStatus, setPortalStatus] = useState("Active");
   const [editSuccess, setEditSuccess] = useState(false);
 
   // Recommendations state
@@ -231,13 +231,13 @@ export default function SubscriptionsPage() {
 
   const estimates = calculateBudgetEstimate();
 
-  const handleDashboardPause = () => {
+  const handlePortalPause = () => {
     if (isPaused) {
       setIsPaused(false);
-      setDashboardStatus("Active");
+      setPortalStatus("Active");
     } else {
       setIsPaused(true);
-      setDashboardStatus("Paused");
+      setPortalStatus("Paused");
     }
   };
 
@@ -262,7 +262,7 @@ Recurring Subscriber Saving Discount (20%): -$${estimates.saving} USD
 Estimated Monthly Retainer Deposit: $${estimates.total} USD
 
 ---
-Sent via INTMOVE automated Concierge Sourcing Dashboard.
+Sent via INTMOVE automated Concierge Sourcing Portal.
 Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const body = encodeURIComponent(bodyText);
@@ -838,18 +838,18 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
         </div>
       </section>
 
-      {/* SUBSCRIBER MANAGEMENT INTERACTIVE DASHBOARD */}
+      {/* SUBSCRIBER MANAGEMENT INTERACTIVE PANEL */}
       <section className="py-24 px-6 bg-[#090909] relative">
         <div className="container mx-auto max-w-4xl relative z-10">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-4xl font-black">Subscriber Management <span className="text-[#D4AF37]">Console</span></h2>
-            <p className="text-white/50 text-sm mt-1">Manage active schedules, pause billing, or track scheduled unboxings in your dashboard preview.</p>
+            <p className="text-white/50 text-sm mt-1">Manage active schedules, pause billing, or track scheduled unboxings in your subscriber portal preview.</p>
           </div>
 
           <div className="bg-[#0d0d0d] border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-32 h-full bg-blue-500/5 blur-2xl pointer-events-none" />
             
-            {/* Dashboard Header */}
+            {/* Portal Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-5">
               <div>
                 <p className="text-[9px] uppercase tracking-widest font-bold text-white/40">Concierge Account Status</p>
@@ -857,14 +857,14 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
                   <span className="text-lg font-extrabold text-white">CONCIERGE-908754</span>
                   <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded tracking-wider border
                     ${isPaused ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}`}>
-                    {dashboardStatus}
+                    {portalStatus}
                   </span>
                 </div>
               </div>
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={handleDashboardPause}
+                  onClick={handlePortalPause}
                   className={`text-xs font-extrabold uppercase px-4 py-2.5 rounded-xl border transition-all
                     ${isPaused 
                       ? "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent" 
@@ -885,7 +885,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
               </div>
             </div>
 
-            {/* Dashboard active alerts */}
+            {/* Portal active alerts */}
             <AnimatePresence>
               {editSuccess && (
                 <motion.div

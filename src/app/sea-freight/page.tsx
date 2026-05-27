@@ -82,7 +82,7 @@ const faqs = [
   { q: "How long does sea freight take?", a: "Sea freight timelines vary by destination, typically ranging from 14 to 45 days depending on the specific port-to-port route." },
   { q: "What is the difference between FCL and LCL?", a: "FCL (Full Container Load) means you rent the entire container exclusively. LCL (Less Than Container Load) means you share container space with others, which is cheaper for smaller shipments." },
   { q: "Do you ship vehicles internationally?", a: "Yes, we offer both dedicated container shipping for luxury cars and RoRo (Roll-on/Roll-off) services for standard vehicles and heavy machinery." },
-  { q: "Can I track my container?", a: "Yes. Our premium tracking dashboard provides real-time updates on your container's status, from port departure to customs clearance." },
+  { q: "Can I track my container?", a: "Yes. Our premium tracking portal provides real-time updates on your container's status, from port departure to customs clearance." },
   { q: "Is sea freight cheaper than air freight?", a: "Significantly. Sea freight is the most cost-effective method for shipping large, heavy, or bulk goods over long distances." },
   { q: "Do you handle customs clearance?", a: "Yes, our team manages all necessary export and import documentation to ensure smooth port clearance." }
 ];
@@ -315,7 +315,7 @@ Thank you.`;
         </div>
       </section>
 
-      {/* Section 6 & 7: Container Tracking Dashboard UI & Global Map */}
+      {/* Section 6 & 7: Container Tracking Portal UI & Global Map */}
       <section className="py-24 px-6 bg-gradient-to-b from-[#0A0F1C] to-[#020617] border-y border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-10">
           <Map className="w-full h-full text-blue-400" strokeWidth={0.5} />
@@ -328,7 +328,7 @@ Thank you.`;
           <div className="bg-[#020617] border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute right-0 top-0 w-64 h-full bg-blue-500/5 blur-3xl pointer-events-none" />
             
-            {/* Dashboard Header */}
+            {/* Portal Header */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-white/10 pb-6 relative z-10">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center border border-white/10">
@@ -344,7 +344,7 @@ Thank you.`;
               </div>
             </div>
 
-            {/* Dashboard Tracking Milestones */}
+            {/* Portal Tracking Milestones */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative z-10">
               <div className="hidden md:block absolute top-1/2 left-0 w-full h-[2px] bg-white/10 -translate-y-1/2 -z-0" />
               <div className="hidden md:block absolute top-1/2 left-0 w-[60%] h-[2px] bg-blue-500 -translate-y-1/2 shadow-[0_0_10px_rgba(59,130,246,0.5)] -z-0" />

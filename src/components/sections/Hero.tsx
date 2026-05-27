@@ -47,21 +47,13 @@ export function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link 
-              href="#contact" 
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))}
               className="flex items-center justify-center gap-2 px-8 py-4 bg-[#D4AF37] hover:bg-[#F3C332] text-[#0B132B] font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] group"
             >
               Get Free Consultation
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            
-            <Link 
-              href="#track" 
-              className="flex items-center justify-center gap-2 px-8 py-4 glass text-white font-bold rounded-lg hover:bg-white/10 transition-all border border-white/20"
-            >
-              <PackageSearch className="w-5 h-5" />
-              Track Shipment
-            </Link>
+            </button>
             
             <Link 
               href="#quote" 

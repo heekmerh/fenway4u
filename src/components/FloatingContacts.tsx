@@ -81,7 +81,7 @@ export function FloatingContacts() {
   const [aiMessages, setAiMessages] = useState<Message[]>([
     {
       sender: "bot",
-      text: "Hello! I am your INTMOVE AI Sourcing Advisor. Ask me anything about document requirements, logistics fees, or travel eligibility guidelines!",
+      text: "Hello! I am your FENWAY4U AI Sourcing Advisor. Ask me anything about document requirements, logistics fees, or travel eligibility guidelines!",
       time: "Just now"
     }
   ]);
@@ -195,7 +195,7 @@ export function FloatingContacts() {
   // Autosave triggers on any change to formData
   useEffect(() => {
     if (formData !== initialFormState) {
-      localStorage.setItem("intmove_consultation_draft", JSON.stringify(formData));
+      localStorage.setItem("fenway4u_consultation_draft", JSON.stringify(formData));
     }
   }, [formData]);
 
@@ -213,7 +213,7 @@ export function FloatingContacts() {
 
   // Load draft on mount
   useEffect(() => {
-    const savedDraft = localStorage.getItem("intmove_consultation_draft");
+    const savedDraft = localStorage.getItem("fenway4u_consultation_draft");
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
@@ -253,7 +253,7 @@ export function FloatingContacts() {
 
   // Restore draft handler
   const restoreDraft = () => {
-    const savedDraft = localStorage.getItem("intmove_consultation_draft");
+    const savedDraft = localStorage.getItem("fenway4u_consultation_draft");
     if (savedDraft) {
       setFormData(JSON.parse(savedDraft));
     }
@@ -262,7 +262,7 @@ export function FloatingContacts() {
 
   // Clear draft / reset form handler
   const discardDraft = () => {
-    localStorage.removeItem("intmove_consultation_draft");
+    localStorage.removeItem("fenway4u_consultation_draft");
     setFormData(initialFormState);
     setUploadedFiles([]);
     setShowRestoreToast(false);
@@ -287,7 +287,7 @@ export function FloatingContacts() {
 
   const getGoogleCalendarLink = () => {
     const title = `Onboarding Consultation: ${formData.service}`;
-    const desc = `Consultation booked with INTMOVE.\nTimezone: ${formData.bookingTimezone}\nMethod: ${formData.consultationType}\nChecklist items ready: ${formData.checklist.join(", ")}`;
+    const desc = `Consultation booked with FENWAY4U.\nTimezone: ${formData.bookingTimezone}\nMethod: ${formData.consultationType}\nChecklist items ready: ${formData.checklist.join(", ")}`;
     
     const dateObj = new Date(formData.bookingDate || "2026-06-18");
     const timeParts = (formData.bookingTime || "02:00 PM").split(" ");
@@ -307,7 +307,7 @@ export function FloatingContacts() {
 
   const getIcsDownloadLink = () => {
     const title = `Onboarding Consultation: ${formData.service}`;
-    const desc = `Consultation booked with INTMOVE.\nTimezone: ${formData.bookingTimezone}\nMethod: ${formData.consultationType}`;
+    const desc = `Consultation booked with FENWAY4U.\nTimezone: ${formData.bookingTimezone}\nMethod: ${formData.consultationType}`;
     
     const dateObj = new Date(formData.bookingDate || "2026-06-18");
     const timeParts = (formData.bookingTime || "02:00 PM").split(" ");
@@ -323,9 +323,9 @@ export function FloatingContacts() {
     
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//INTMOVE//Advisory Onboarding//EN
+PRODID:-//FENWAY4U//Advisory Onboarding//EN
 BEGIN:VEVENT
-UID:uid-${Date.now()}@intmove.com
+UID:uid-${Date.now()}@fenway4u.com
 DTSTAMP:${startStr}
 DTSTART:${startStr}
 DTEND:${endStr}
@@ -587,8 +587,8 @@ ${Object.entries(costBreakdown.breakdown).map(([k, v]) => `  - ${k}: $${v} USD`)
 Files Ready to Upload: ${uploadedFiles.length > 0 ? uploadedFiles.map(f => `${f.name} (${f.size})`).join(", ") : "No files attached. Sourcing through mail."}
 
 ---
-Inquiry Draft ID: INTMOVE-${Math.floor(100000 + Math.random() * 900000)}
-Sent via INTMOVE Global Onboarding & Premium Booking System`;
+Inquiry Draft ID: FENWAY4U-${Math.floor(100000 + Math.random() * 900000)}
+Sent via FENWAY4U Global Onboarding & Premium Booking System`;
 
     const body = encodeURIComponent(bodyText);
 
@@ -599,7 +599,7 @@ Sent via INTMOVE Global Onboarding & Premium Booking System`;
     setIsSubmitted(true);
     
     // Clean up local storage
-    localStorage.removeItem("intmove_consultation_draft");
+    localStorage.removeItem("fenway4u_consultation_draft");
     
     setTimeout(() => {
       setIsSubmitted(false);
@@ -1485,14 +1485,14 @@ Sent via INTMOVE Global Onboarding & Premium Booking System`;
                                 </a>
                                 <a 
                                   href={getIcsDownloadLink()}
-                                  download="INTMOVE_Consultation.ics"
+                                  download="FENWAY4U_Consultation.ics"
                                   className="px-3 py-1.5 rounded-lg bg-amber-500/10 text-[#D4AF37] hover:bg-amber-500/20 border border-amber-500/20 transition-colors flex items-center gap-1.5"
                                 >
                                   Outlook Calendar (.ics)
                                 </a>
                                 <a 
                                   href={getIcsDownloadLink()}
-                                  download="INTMOVE_Consultation.ics"
+                                  download="FENWAY4U_Consultation.ics"
                                   className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors flex items-center gap-1.5"
                                 >
                                   Apple iCal (.ics)
@@ -1632,7 +1632,7 @@ Sent via INTMOVE Global Onboarding & Premium Booking System`;
                     <div className="flex flex-col items-start">
                       <div className="bg-white/5 border border-white/5 text-white/40 p-3 rounded-2xl rounded-tl-none flex gap-1.5 items-center">
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D4AF37]" />
-                        <span>INTMOVE AI is analyzing rules...</span>
+                        <span>FENWAY4U AI is analyzing rules...</span>
                       </div>
                     </div>
                   )}

@@ -7,7 +7,7 @@ const testimonials = [
   {
     name: "Sarah Jenkins",
     role: "Relocated to UK",
-    text: "INTMOVE made my move from Toronto to London completely stress-free. They handled everything from my visa to shipping my car.",
+    text: "FENWAY4U made my move from Toronto to London completely stress-free. They handled everything from my visa to shipping my car.",
     rating: 5,
   },
   {

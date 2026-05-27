@@ -98,8 +98,8 @@ export default function AirFreightPage() {
     const cargoType = (form.elements[2] as HTMLSelectElement).value;
     const weight = (form.elements[3] as HTMLInputElement).value;
 
-    const subject = encodeURIComponent("Air Freight Cargo Quote Request — INTMOVE");
-    const bodyText = `Hi INTMOVE Cargo Team,
+    const subject = encodeURIComponent("Air Freight Cargo Quote Request — FENWAY4U");
+    const bodyText = `Hi FENWAY4U Cargo Team,
 
 I would like to request an Air Freight cargo quote.
 
@@ -449,7 +449,7 @@ Thank you.`;
               <div className="relative h-64 rounded-3xl overflow-hidden border border-white/10 mb-8">
                  <Image src="/images/air_freight_b2b_1779128236940.png" alt="Logistics Control Room" fill className="object-cover" />
               </div>
-              <a href="mailto:consult@fenway4u.com?subject=Discuss B2B Logistics Partnership — INTMOVE" className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 transition-all text-lg w-full sm:w-auto">
+              <a href="mailto:consult@fenway4u.com?subject=Discuss B2B Logistics Partnership — FENWAY4U" className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 transition-all text-lg w-full sm:w-auto">
                 Discuss B2B Partnerships <ArrowRight className="w-5 h-5" />
               </a>
             </div>

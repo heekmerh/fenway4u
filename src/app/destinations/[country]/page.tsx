@@ -432,7 +432,7 @@ export default function CountryEcosystemPage({ params }: { params: Promise<{ cou
   // Local storage for checklist
   useEffect(() => {
     if (currentCountry) {
-      const saved = localStorage.getItem(`intmove_checklist_${countrySlug}`);
+      const saved = localStorage.getItem(`fenway4u_checklist_${countrySlug}`);
       if (saved) {
         setInteractiveChecklist(JSON.parse(saved));
       }
@@ -443,7 +443,7 @@ export default function CountryEcosystemPage({ params }: { params: Promise<{ cou
     setInteractiveChecklist(prev => {
       const exists = prev.includes(item);
       const updated = exists ? prev.filter(i => i !== item) : [...prev, item];
-      localStorage.setItem(`intmove_checklist_${countrySlug}`, JSON.stringify(updated));
+      localStorage.setItem(`fenway4u_checklist_${countrySlug}`, JSON.stringify(updated));
       return updated;
     });
   };

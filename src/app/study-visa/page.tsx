@@ -87,7 +87,7 @@ const successStories = [
     name: "Sarah M.",
     country: "Canada",
     school: "University of Toronto",
-    story: "INTMOVE made my Canadian dream a reality. Their SOP guidance was unmatched!",
+    story: "FENWAY4U made my Canadian dream a reality. Their SOP guidance was unmatched!",
     image: "/images/success_story_canada_1778964878996.png"
   },
   {
@@ -463,7 +463,7 @@ export default function StudyVisaPage() {
                 </svg>
                 Chat on Telegram
               </a>
-              <a href="mailto:consult@fenway4u.com?subject=Study Visa Academic Advisory Request — INTMOVE&body=Hi INTMOVE Visa Team,%0A%0AI would like to request academic study visa advisory support.%0A%0AName:%0ACountry of Interest:%0AIntended Course:%0A%0AThank you." className="glass text-white font-bold px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2">
+              <a href="mailto:consult@fenway4u.com?subject=Study Visa Academic Advisory Request — FENWAY4U&body=Hi FENWAY4U Visa Team,%0A%0AI would like to request academic study visa advisory support.%0A%0AName:%0ACountry of Interest:%0AIntended Course:%0A%0AThank you." className="glass text-white font-bold px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2">
                 <Mail className="w-5 h-5 text-[#D4AF37]" /> Email An Advisor
               </a>
             </div>

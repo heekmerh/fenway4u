@@ -14,7 +14,7 @@ export function Footer() {
           <div className="space-y-6">
             <Link href="/" className="flex items-center gap-2">
               <Plane className="w-8 h-8 text-[#D4AF37]" />
-              <span className="text-xl font-bold tracking-wider text-white">INTMOVE</span>
+              <span className="text-xl font-bold tracking-wider text-white">FENWAY4U</span>
             </Link>
             <p className="text-white/60 leading-relaxed text-sm">
               Premium international relocation, global shipping, and logistics solutions. Seamlessly moving your life and business across borders.
@@ -79,7 +79,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-[#D4AF37] shrink-0" />
-                <span>support@intmove.com</span>
+                <span>support@fenway4u.com</span>
               </li>
             </ul>
             
@@ -101,7 +101,7 @@ export function Footer() {
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/40 text-sm">
-            &copy; {new Date().getFullYear()} INTMOVE. All rights reserved.
+            &copy; {new Date().getFullYear()} FENWAY4U. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm text-white/40">
             <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>

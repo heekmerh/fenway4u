@@ -524,7 +524,7 @@ export default function WorkPermitPage() {
                 </svg>
                 Telegram Career Consultation
               </a>
-              <a href="mailto:consult@fenway4u.com?subject=Work Permit Advisory Request — INTMOVE&body=Hi INTMOVE Visa Team,%0A%0AI would like to request skilled worker visa assistance.%0A%0AName:%0AOccupation:%0AExperience:%0A%0AThank you." className="glass text-white font-bold px-10 py-5 rounded-xl hover:bg-white/10 border border-white/20 transition-all flex items-center justify-center gap-3 text-lg">
+              <a href="mailto:consult@fenway4u.com?subject=Work Permit Advisory Request — FENWAY4U&body=Hi FENWAY4U Visa Team,%0A%0AI would like to request skilled worker visa assistance.%0A%0AName:%0AOccupation:%0AExperience:%0A%0AThank you." className="glass text-white font-bold px-10 py-5 rounded-xl hover:bg-white/10 border border-white/20 transition-all flex items-center justify-center gap-3 text-lg">
                 <Mail className="w-5 h-5 text-[#D4AF37]" /> Email Immigration Team
               </a>
             </div>

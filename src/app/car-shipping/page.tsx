@@ -294,7 +294,7 @@ export default function CarShippingPage() {
     const subject = encodeURIComponent(
       selectedCar 
         ? `${selectedCar.type === "auction" ? "Place Bid Offer" : "Secure Vehicle Request"} — ${selectedCar.year} ${selectedCar.make} ${selectedCar.model}` 
-        : "Car Sourcing Request — INTMOVE"
+        : "Car Sourcing Request — FENWAY4U"
     );
 
     const bodyText = `Car Sourcing & Shipping Inquiry

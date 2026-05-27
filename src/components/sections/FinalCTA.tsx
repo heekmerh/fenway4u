@@ -26,50 +26,50 @@ export function FinalCTA() {
   const emailMap: { [key: string]: { subject: string; body: string } } = {
     "/study-visa": {
       subject: "Study Visa Academic Advisory Request",
-      body: "Hi INTMOVE Team,\n\nI would like to request academic visa guidance.\n\nName:\nCountry of Interest:\nIntended Level of Study:\nExpected Intakes:\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI would like to request academic visa guidance.\n\nName:\nCountry of Interest:\nIntended Level of Study:\nExpected Intakes:\n\nThank you.",
     },
     "/work-permit": {
       subject: "Work Permit Advisory Request",
-      body: "Hi INTMOVE Team,\n\nI would like to request immigration work permit assistance.\n\nName:\nTarget Country:\nProfession/Industry:\nYears of Experience:\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI would like to request immigration work permit assistance.\n\nName:\nTarget Country:\nProfession/Industry:\nYears of Experience:\n\nThank you.",
     },
     "/relocation-support": {
       subject: "Global Relocation & Travel Assessment",
-      body: "Hi INTMOVE Team,\n\nI would like to request a travel and relocation assessment.\n\nName:\nCurrent Location:\nDestination Country:\nTimeline to Move:\nNumber of Family Members Moving:\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI would like to request a travel and relocation assessment.\n\nName:\nCurrent Location:\nDestination Country:\nTimeline to Move:\nNumber of Family Members Moving:\n\nThank you.",
     },
     "/air-freight": {
       subject: "Air Freight Cargo Quote Request",
-      body: "Hi INTMOVE Team,\n\nI would like to request an Air Freight cargo quote.\n\nName:\nCargo Origin:\nCargo Destination:\nEstimated Weight (kg):\nType of Goods:\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI would like to request an Air Freight cargo quote.\n\nName:\nCargo Origin:\nCargo Destination:\nEstimated Weight (kg):\nType of Goods:\n\nThank you.",
     },
     "/sea-freight": {
       subject: "Sea Freight Logistics Quote Request",
-      body: "Hi INTMOVE Team,\n\nI would like to request a Sea Freight cargo quote.\n\nName:\nOrigin Port:\nDestination Port:\nContainer Size (20ft/40ft/LCL):\nEstimated Weight (kg):\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI would like to request a Sea Freight cargo quote.\n\nName:\nOrigin Port:\nDestination Port:\nContainer Size (20ft/40ft/LCL):\nEstimated Weight (kg):\n\nThank you.",
     },
     "/car-shipping": {
       subject: "Car Shipping Quote Request",
-      body: "Hi INTMOVE Team,\n\nI would like to request a vehicle shipping quote.\n\nName:\nVehicle Make & Model:\nOrigin Country/Port:\nDestination Country/Port:\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI would like to request a vehicle shipping quote.\n\nName:\nVehicle Make & Model:\nOrigin Country/Port:\nDestination Country/Port:\n\nThank you.",
     },
     "/electronics-shipping": {
       subject: "Electronics Shipping Request",
-      body: "Hi INTMOVE Team,\n\nI would like to request an electronics shipping quote.\n\nName:\nItem Type (e.g., Laptops, Phones):\nOrigin (USA/UK/Canada):\nDestination:\nQuantity:\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI would like to request an electronics shipping quote.\n\nName:\nItem Type (e.g., Laptops, Phones):\nOrigin (USA/UK/Canada):\nDestination:\nQuantity:\n\nThank you.",
     },
     "/customs-clearance": {
       subject: "Customs Clearance Brokerage Request",
-      body: "Hi INTMOVE Team,\n\nI need customs clearance brokerage assistance.\n\nName:\nImport/Export Origin:\nCustoms Destination Port:\nType of Goods:\nCommercial Invoice Attached? (Yes/No):\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI need customs clearance brokerage assistance.\n\nName:\nImport/Export Origin:\nCustoms Destination Port:\nType of Goods:\nCommercial Invoice Attached? (Yes/No):\n\nThank you.",
     },
     "/shop-for-me": {
       subject: "Shop For Me Purchasing Order",
-      body: "Hi INTMOVE Team,\n\nI would like to use the Shop For Me purchase concierge service.\n\nName:\nProduct Description:\nProduct Store Link:\nQuantity:\nDelivery Address:\n\nThank you.",
+      body: "Hi FENWAY4U Team,\n\nI would like to use the Shop For Me purchase concierge service.\n\nName:\nProduct Description:\nProduct Store Link:\nQuantity:\nDelivery Address:\n\nThank you.",
     },
   };
 
   const defaultEmail = {
     subject: "General Consultation Request",
-    body: "Hi INTMOVE Team,\n\nI would like to request a premium logistics and relocation consultation.\n\nName:\nService of Interest:\nDetails of Request:\n\nThank you.",
+    body: "Hi FENWAY4U Team,\n\nI would like to request a premium logistics and relocation consultation.\n\nName:\nService of Interest:\nDetails of Request:\n\nThank you.",
   };
 
   const currentEmailData = emailMap[pathname] || defaultEmail;
   const mailtoLink = `mailto:consult@fenway4u.com?subject=${encodeURIComponent(
-    currentEmailData.subject + " — INTMOVE"
+    currentEmailData.subject + " — FENWAY4U"
   )}&body=${encodeURIComponent(currentEmailData.body)}`;
 
   // Dispatch custom window event to trigger global slide-up modal

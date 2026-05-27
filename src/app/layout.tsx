@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "INTMOVE | Premium International Logistics",
+  title: "FENWAY4U | Premium International Logistics",
   description: "Relocation, shipping, sourcing, and global logistics — all in one seamless experience.",
 };
 

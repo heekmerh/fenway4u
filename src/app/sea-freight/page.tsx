@@ -108,8 +108,8 @@ export default function SeaFreightPage() {
     const serviceType = (form.elements[2] as HTMLSelectElement).value;
     const volume = (form.elements[3] as HTMLInputElement).value;
 
-    const subject = encodeURIComponent("Sea Freight Logistics Quote Request — INTMOVE");
-    const bodyText = `Hi INTMOVE Logistics Team,
+    const subject = encodeURIComponent("Sea Freight Logistics Quote Request — FENWAY4U");
+    const bodyText = `Hi FENWAY4U Logistics Team,
 
 I would like to request a Sea Freight cargo quote.
 
@@ -257,7 +257,7 @@ Thank you.`;
                 <li className="flex items-center gap-3 text-white/80"><CheckCircle className="w-5 h-5 text-green-500" /> Full customs and inspection support</li>
                 <li className="flex items-center gap-3 text-white/80"><CheckCircle className="w-5 h-5 text-green-500" /> Secure container loading for luxury cars</li>
               </ul>
-              <a href="mailto:consult@fenway4u.com?subject=Vehicle Shipping Consultation — INTMOVE" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 transition-all">
+              <a href="mailto:consult@fenway4u.com?subject=Vehicle Shipping Consultation — FENWAY4U" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 transition-all">
                 Consult Vehicle Specialist <ArrowRight className="w-5 h-5" />
               </a>
             </div>
@@ -469,7 +469,7 @@ Thank you.`;
                 <div className="bg-[#0A0F1C] border border-white/5 p-4 rounded-xl"><p className="text-white font-bold">Container Management</p></div>
                 <div className="bg-[#0A0F1C] border border-white/5 p-4 rounded-xl"><p className="text-white font-bold">Supply Chain Logistics</p></div>
               </div>
-              <a href="mailto:consult@fenway4u.com?subject=Discuss Corporate Logistics Partnership — INTMOVE" className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 transition-all w-full sm:w-auto">
+              <a href="mailto:consult@fenway4u.com?subject=Discuss Corporate Logistics Partnership — FENWAY4U" className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 transition-all w-full sm:w-auto">
                 Corporate Inquiry <ArrowRight className="w-5 h-5" />
               </a>
             </div>

@@ -93,8 +93,8 @@ export default function ElectronicsShippingPage() {
 
   const handleShopForMeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent("Shop For Me Purchasing Order — INTMOVE");
-    const bodyText = `Hi INTMOVE Sourcing Concierge Team,
+    const subject = encodeURIComponent("Shop For Me Purchasing Order — FENWAY4U");
+    const bodyText = `Hi FENWAY4U Sourcing Concierge Team,
 
 I would like to use the Shop For Me concierge service to buy electronics.
 
@@ -454,7 +454,7 @@ Thank you.`;
           <p className="text-white/60 text-lg mb-10 max-w-2xl mx-auto font-light">
             Are you an electronics retailer, wholesaler, or commercial importer? We provide dedicated container shipping, pallet consolidation, and recurring logistics services.
           </p>
-          <a href="mailto:consult@fenway4u.com?subject=Contact Electronics B2B Logistics Sales — INTMOVE" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 transition-all text-lg">
+          <a href="mailto:consult@fenway4u.com?subject=Contact Electronics B2B Logistics Sales — FENWAY4U" className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl border border-white/10 transition-all text-lg">
             Contact B2B Sales <ArrowRight className="w-5 h-5" />
           </a>
         </div>
@@ -540,7 +540,7 @@ Thank you.`;
                 </svg>
                 Telegram Shipping Support
               </a>
-              <a href="mailto:consult@fenway4u.com?subject=Electronics Shipping Quote Request — INTMOVE&body=Hi INTMOVE Shipping Team,%0A%0AI would like to request an electronics shipping quote.%0A%0AItems to ship:%0AOrigin:%0ADestination:%0A%0AThank you." className="bg-[#0A0F1C]/80 border border-[#D4AF37]/50 hover:bg-[#D4AF37]/10 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] text-white font-bold px-10 py-5 rounded-xl transition-all duration-300 text-lg flex items-center justify-center gap-2">
+              <a href="mailto:consult@fenway4u.com?subject=Electronics Shipping Quote Request — FENWAY4U&body=Hi FENWAY4U Shipping Team,%0A%0AI would like to request an electronics shipping quote.%0A%0AItems to ship:%0AOrigin:%0ADestination:%0A%0AThank you." className="bg-[#0A0F1C]/80 border border-[#D4AF37]/50 hover:bg-[#D4AF37]/10 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] text-white font-bold px-10 py-5 rounded-xl transition-all duration-300 text-lg flex items-center justify-center gap-2">
                 <Mail className="w-5 h-5 text-[#D4AF37]" />
                 Email Shipping Department
               </a>

@@ -262,7 +262,7 @@ Recurring Subscriber Saving Discount (20%): -$${estimates.saving} USD
 Estimated Monthly Retainer Deposit: $${estimates.total} USD
 
 ---
-Sent via INTMOVE automated Concierge Sourcing Portal.
+Sent via FENWAY4U automated Concierge Sourcing Portal.
 Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const body = encodeURIComponent(bodyText);

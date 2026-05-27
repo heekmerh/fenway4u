@@ -38,7 +38,7 @@ export function Navbar() {
       <div className="container mx-auto px-6 md:px-12 flex justify-between items-center max-w-7xl">
         <Link href="/" className="flex items-center gap-2 group">
           <Plane className="w-8 h-8 text-[#D4AF37] group-hover:rotate-12 transition-transform" />
-          <span className="text-xl font-bold tracking-wider text-white">INTMOVE</span>
+          <span className="text-xl font-bold tracking-wider text-white">FENWAY4U</span>
         </Link>
 
         {/* Desktop Nav */}

@@ -271,13 +271,13 @@ export default function ShopForMePage() {
   // Autosave triggers for foods builder
   useEffect(() => {
     if (foodItems.length > 1 || foodItems[0].name !== "") {
-      localStorage.setItem("intmove_food_draft", JSON.stringify(foodItems));
+      localStorage.setItem("fenway4u_food_draft", JSON.stringify(foodItems));
     }
   }, [foodItems]);
 
   // Load draft on mount
   useEffect(() => {
-    const draft = localStorage.getItem("intmove_food_draft");
+    const draft = localStorage.getItem("fenway4u_food_draft");
     if (draft) {
       try {
         const parsed = JSON.parse(draft);
@@ -291,7 +291,7 @@ export default function ShopForMePage() {
   }, []);
 
   const restoreFoodDraft = () => {
-    const draft = localStorage.getItem("intmove_food_draft");
+    const draft = localStorage.getItem("fenway4u_food_draft");
     if (draft) {
       setFoodItems(JSON.parse(draft));
     }
@@ -299,7 +299,7 @@ export default function ShopForMePage() {
   };
 
   const discardFoodDraft = () => {
-    localStorage.removeItem("intmove_food_draft");
+    localStorage.removeItem("fenway4u_food_draft");
     setFoodItems([{ id: "1", name: "", unit: "KG", qty: "1", budget: "$10–$25", brand: "", notes: "" }]);
     setRestoreDraftAvailable(false);
   };
@@ -350,8 +350,8 @@ export default function ShopForMePage() {
   // Handlers standard submission
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent("Shop For Me Sourcing Request — INTMOVE");
-    const bodyText = `Hi INTMOVE Sourcing Concierge Team,
+    const subject = encodeURIComponent("Shop For Me Sourcing Request — FENWAY4U");
+    const bodyText = `Hi FENWAY4U Sourcing Concierge Team,
 
 I would like to request a new Shop For Me personal shopping request.
 
@@ -397,13 +397,13 @@ Freshness protection wrapping: $${estimates.wrap} USD
 Estimated Total Retention Deposit: $${estimates.total} USD
 
 ---
-Sent via INTMOVE African Groceries Marketplace Console.
+Sent via FENWAY4U African Groceries Marketplace Console.
 Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const body = encodeURIComponent(bodyText);
     window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
 
-    localStorage.removeItem("intmove_food_draft");
+    localStorage.removeItem("fenway4u_food_draft");
     setFoodItems([{ id: "1", name: "", unit: "KG", qty: "1", budget: "$10–$25", brand: "", notes: "" }]);
     setUploadedFoodFiles([]);
   };
@@ -1322,7 +1322,7 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
                 </svg>
                 Telegram Shopping Concierge
               </a>
-              <a href="mailto:consult@fenway4u.com?subject=Shop For Me Purchasing Order — INTMOVE&body=Hi INTMOVE Sourcing Team,%0A%0AI would like to submit a Shop For Me purchase request.%0A%0AItems to buy:%0ASourcing Store Link:%0A%0AThank you." className="glass text-white font-bold px-10 py-5 rounded-xl hover:bg-white/10 border border-white/20 transition-all flex items-center justify-center gap-3 text-lg">
+              <a href="mailto:consult@fenway4u.com?subject=Shop For Me Purchasing Order — FENWAY4U&body=Hi FENWAY4U Sourcing Team,%0A%0AI would like to submit a Shop For Me purchase request.%0A%0AItems to buy:%0ASourcing Store Link:%0A%0AThank you." className="glass text-white font-bold px-10 py-5 rounded-xl hover:bg-white/10 border border-white/20 transition-all flex items-center justify-center gap-3 text-lg">
                 <Mail className="w-5 h-5 text-[#D4AF37]" /> Email Purchase Request
               </a>
             </div>

@@ -116,8 +116,8 @@ export default function CustomsClearancePage() {
     const destination = (form.elements[1] as HTMLSelectElement).value;
     const details = (form.elements[2] as HTMLInputElement).value;
 
-    const subject = encodeURIComponent("Customs Clearance Brokerage Request — INTMOVE");
-    const bodyText = `Hi INTMOVE Customs Clearance Team,
+    const subject = encodeURIComponent("Customs Clearance Brokerage Request — FENWAY4U");
+    const bodyText = `Hi FENWAY4U Customs Clearance Team,
 
 I need assistance with customs clearance and brokerage.
 

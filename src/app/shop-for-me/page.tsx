@@ -491,6 +491,10 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
               <button onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))} className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
                 <Truck className="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-transform" /> Get Shipping Estimate
               </button>
+              <Link href="/shop-for-me/subscribe" className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-red-600 hover:to-orange-500 text-white font-bold px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all flex items-center justify-center gap-2 text-lg relative overflow-hidden group">
+                <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Sparkles className="w-5 h-5 text-orange-200 animate-pulse" /> Subscribe
+              </Link>
             </motion.div>
           </div>
         </div>

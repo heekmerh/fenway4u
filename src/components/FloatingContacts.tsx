@@ -8,7 +8,7 @@ import {
   UploadCloud, FileText, Sparkles, ChevronRight, Trash2, Loader2, 
   HelpCircle, Send, DollarSign, AlertCircle, Laptop, BookOpen, 
   Briefcase, Plane, Ship, Globe, Building2, ShoppingBag, Smartphone, 
-  Car, Settings, CheckSquare, Square
+  Car, Settings, CheckSquare, Square, Calendar, ChevronLeft, Phone, Video
 } from "lucide-react";
 
 // Types for Form Data
@@ -43,6 +43,11 @@ interface FormData {
   freightWeight: string;
   freightDimensions: string;
   freightCargoType: string;
+  // Appointment Details
+  bookingDate: string;
+  bookingTime: string;
+  bookingTimezone: string;
+  consultationType: string;
 }
 
 interface UploadedFile {
@@ -83,6 +88,9 @@ export function FloatingContacts() {
   const [aiInput, setAiInput] = useState("");
   const [aiTyping, setAiTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // Calendar scheduling month state (initially June 2026)
+  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 5));
 
   // Form State initialized to empty defaults
   const initialFormState: FormData = {
@@ -112,6 +120,11 @@ export function FloatingContacts() {
     freightWeight: "",
     freightDimensions: "",
     freightCargoType: "Commercial Goods",
+    // Scheduling parameters
+    bookingDate: "",
+    bookingTime: "",
+    bookingTimezone: "UTC",
+    consultationType: "Telegram Consultation",
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormState);
@@ -186,6 +199,18 @@ export function FloatingContacts() {
     }
   }, [formData]);
 
+  // Auto-detect timezone on mount
+  useEffect(() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz) {
+        setFormData(prev => ({ ...prev, bookingTimezone: tz }));
+      }
+    } catch (e) {
+      console.warn("Timezone detection failed", e);
+    }
+  }, []);
+
   // Load draft on mount
   useEffect(() => {
     const savedDraft = localStorage.getItem("intmove_consultation_draft");
@@ -241,6 +266,75 @@ export function FloatingContacts() {
     setFormData(initialFormState);
     setUploadedFiles([]);
     setShowRestoreToast(false);
+  };
+
+  // Calendar cell helper and calendar event link generators
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    
+    const cells = [];
+    for (let i = 0; i < firstDayIndex; i++) {
+      cells.push(null);
+    }
+    for (let day = 1; day <= totalDays; day++) {
+      cells.push(new Date(year, month, day));
+    }
+    return cells;
+  };
+
+  const getGoogleCalendarLink = () => {
+    const title = `Onboarding Consultation: ${formData.service}`;
+    const desc = `Consultation booked with INTMOVE.\nTimezone: ${formData.bookingTimezone}\nMethod: ${formData.consultationType}\nChecklist items ready: ${formData.checklist.join(", ")}`;
+    
+    const dateObj = new Date(formData.bookingDate || "2026-06-18");
+    const timeParts = (formData.bookingTime || "02:00 PM").split(" ");
+    let [hours, minutes] = timeParts[0].split(":");
+    if (timeParts[1] === "PM" && hours !== "12") hours = String(Number(hours) + 12);
+    if (timeParts[1] === "AM" && hours === "12") hours = "00";
+    
+    dateObj.setHours(Number(hours), Number(minutes), 0);
+    
+    const startStr = dateObj.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    // Add 45 mins
+    const endDate = new Date(dateObj.getTime() + 45 * 60 * 1000);
+    const endStr = endDate.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent(desc)}&sf=true&output=xml`;
+  };
+
+  const getIcsDownloadLink = () => {
+    const title = `Onboarding Consultation: ${formData.service}`;
+    const desc = `Consultation booked with INTMOVE.\nTimezone: ${formData.bookingTimezone}\nMethod: ${formData.consultationType}`;
+    
+    const dateObj = new Date(formData.bookingDate || "2026-06-18");
+    const timeParts = (formData.bookingTime || "02:00 PM").split(" ");
+    let [hours, minutes] = timeParts[0].split(":");
+    if (timeParts[1] === "PM" && hours !== "12") hours = String(Number(hours) + 12);
+    if (timeParts[1] === "AM" && hours === "12") hours = "00";
+    
+    dateObj.setHours(Number(hours), Number(minutes), 0);
+    
+    const startStr = dateObj.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    const endDate = new Date(dateObj.getTime() + 45 * 60 * 1000);
+    const endStr = endDate.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//INTMOVE//Advisory Onboarding//EN
+BEGIN:VEVENT
+UID:uid-${Date.now()}@intmove.com
+DTSTAMP:${startStr}
+DTSTART:${startStr}
+DTEND:${endStr}
+SUMMARY:${title}
+DESCRIPTION:${desc}
+END:VEVENT
+END:VCALENDAR`;
+    
+    return `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
   };
 
   // Drag and Drop Handlers
@@ -425,7 +519,7 @@ export function FloatingContacts() {
       : 100;
 
     // Create the subject line based on framework
-    const subject = encodeURIComponent(`New ${formData.service} Onboarding Inquiry — ${formData.name}`);
+    const subject = encodeURIComponent(`New Consultation Booking — ${formData.service} — ${formData.name}`);
     
     // Category-based email template body
     let bodyText = `========= CLIENT PROFILE =========
@@ -438,6 +532,13 @@ Destination Target: ${formData.destination || "Not Provided"}
 Service Requested: ${formData.service}
 Preferred Contact: ${formData.contactMethod}
 Urgency Level: ${formData.urgency}
+
+========= APPOINTMENT SCHEDULED =========
+Consultation Type: ${formData.consultationType}
+Date Selected: ${formData.bookingDate}
+Time Selected: ${formData.bookingTime}
+User Timezone: ${formData.bookingTimezone}
+Note: The first 30 minutes of the consultation is entirely free. Billed hourly subsequently.
 
 ========= SERVICE DETAILS & LOGIC =========\n`;
 
@@ -467,14 +568,14 @@ Cargo Commodity Type: ${formData.freightCargoType}
 `;
     }
 
-    if (requiresChecklist) {
-      bodyText += `\n========= SMART CHECKLIST STATUS (${checklistRate}% Complete) =========
-${checklistsByService[formData.service].map(item => {
+    // checklist calculations using standard fallback if none exists
+    const listToUse = checklistsByService[formData.service] || ["International Passport", "Driver License / ID Card", "Utility Bill / Proof of Address"];
+    bodyText += `\n========= SMART CHECKLIST STATUS (${formData.checklist.length}/${listToUse.length} Completed) =========
+${listToUse.map(item => {
   const checked = formData.checklist.includes(item);
   return `${checked ? "✅ [HAS DOCUMENT]" : "❌ [MISSING]"} - ${item}`;
 }).join("\n")}
 `;
-    }
 
     bodyText += `
 ========= DYNAMIC COST ESTIMATION =========
@@ -487,7 +588,7 @@ Files Ready to Upload: ${uploadedFiles.length > 0 ? uploadedFiles.map(f => `${f.
 
 ---
 Inquiry Draft ID: INTMOVE-${Math.floor(100000 + Math.random() * 900000)}
-Sent via INTMOVE Global Consultation Onboarding System`;
+Sent via INTMOVE Global Onboarding & Premium Booking System`;
 
     const body = encodeURIComponent(bodyText);
 
@@ -616,15 +717,21 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                 {/* Progress Indicators */}
                 <div className="mb-8">
                   <div className="flex items-center justify-between text-xs text-white/50 font-bold mb-3 uppercase tracking-wider">
-                    <span>Step {activeStep} of 3</span>
+                    <span>Step {activeStep} of 5</span>
                     <span className="text-[#D4AF37]">
-                      {activeStep === 1 ? "Personal Profile" : activeStep === 2 ? "Service custom details" : "Review & Attestation"}
+                      {activeStep === 1 && "Personal Profile"}
+                      {activeStep === 2 && "Service details"}
+                      {activeStep === 3 && "Smart Checklist"}
+                      {activeStep === 4 && "Calendar Scheduling"}
+                      {activeStep === 5 && "Review & Submit"}
                     </span>
                   </div>
                   <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden flex gap-1">
-                    <div className={`h-full rounded-full transition-all duration-300 ${activeStep >= 1 ? 'bg-gradient-to-r from-blue-500 to-[#D4AF37] w-1/3' : 'w-0'}`} />
-                    <div className={`h-full rounded-full transition-all duration-300 ${activeStep >= 2 ? 'bg-gradient-to-r from-[#D4AF37] to-blue-400 w-1/3' : 'w-0'}`} />
-                    <div className={`h-full rounded-full transition-all duration-300 ${activeStep >= 3 ? 'bg-[#D4AF37] w-1/3' : 'w-0'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${activeStep >= 1 ? 'bg-gradient-to-r from-blue-500 to-[#D4AF37] w-1/5' : 'w-0'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${activeStep >= 2 ? 'bg-gradient-to-r from-[#D4AF37] to-purple-500 w-1/5' : 'w-0'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${activeStep >= 3 ? 'bg-gradient-to-r from-purple-500 to-pink-500 w-1/5' : 'w-0'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${activeStep >= 4 ? 'bg-gradient-to-r from-pink-500 to-blue-400 w-1/5' : 'w-0'}`} />
+                    <div className={`h-full rounded-full transition-all duration-300 ${activeStep >= 5 ? 'bg-[#D4AF37] w-1/5' : 'w-0'}`} />
                   </div>
                 </div>
 
@@ -735,7 +842,7 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                           </motion.div>
                         )}
 
-                        {/* STEP 2: SERVICE-SPECIFIC CUSTOM DETAILS & CHECKLISTS */}
+                        {/* STEP 2: SERVICE DETAILS */}
                         {activeStep === 2 && (
                           <motion.div
                             key="step2"
@@ -788,45 +895,6 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                                 </select>
                               </div>
                             </div>
-
-                            {/* --- CONDITIONAL FORMS: DOCK PREP SMART CHECKLISTS --- */}
-                            {requiresChecklist && (
-                              <motion.div 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-white/3 border border-white/5 rounded-2xl p-5"
-                              >
-                                <h4 className="font-bold text-white text-sm uppercase tracking-wider text-[#D4AF37] mb-2 flex items-center gap-2">
-                                  <Shield className="w-4 h-4 text-[#D4AF37]" /> Smart Checklist: Required Documentation
-                                </h4>
-                                <p className="text-white/40 text-xs mb-4">Tick the items you already possess. Our compliance system will prepare templates for missing papers.</p>
-                                
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                  {checklistsByService[formData.service].map((item) => {
-                                    const checked = formData.checklist.includes(item);
-                                    return (
-                                      <button
-                                        key={item}
-                                        type="button"
-                                        onClick={() => toggleChecklistItem(item)}
-                                        className={`flex items-center gap-3 p-3 rounded-xl border text-left text-xs transition-all duration-300
-                                          ${checked 
-                                            ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-white font-semibold' 
-                                            : 'bg-[#020617] border-white/5 text-white/50 hover:border-white/20'}`}
-                                      >
-                                        <div className="shrink-0">
-                                          {checked 
-                                            ? <CheckSquare className="w-4 h-4 text-[#D4AF37] animate-[scale_0.2s_ease-out]" /> 
-                                            : <Square className="w-4 h-4 text-white/30" />
-                                          }
-                                        </div>
-                                        <span>{item}</span>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </motion.div>
-                            )}
 
                             {/* --- CONDITIONAL SPECIFICS: STUDY VISA + CANADA LOGIC --- */}
                             {formData.service === "Study Visa Guidance" && formData.destination === "Canada" && (
@@ -1018,7 +1086,7 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                           </motion.div>
                         )}
 
-                        {/* STEP 3: DOCUMENT UPLOAD & LIVE COST BREAKDOWN */}
+                        {/* STEP 3: DOCUMENT CHECKLIST */}
                         {activeStep === 3 && (
                           <motion.div
                             key="step3"
@@ -1027,32 +1095,322 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                             exit={{ x: 20, opacity: 0 }}
                             className="space-y-6"
                           >
-                            <h3 className="text-2xl font-bold text-white tracking-tight">Review & Upload</h3>
-                            <p className="text-white/50 text-sm font-light">Confirm your live estimate and attach support documents to complete submission.</p>
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <h3 className="text-2xl font-bold text-white tracking-tight">Required Documents</h3>
+                                <p className="text-white/50 text-sm font-light">Tick the items you already possess. Our compliance system will prepare templates for missing papers.</p>
+                              </div>
+                            </div>
 
-                            {/* Live Dynamic Cost Estimate Card */}
-                            <div className="p-6 rounded-2xl bg-gradient-to-br from-white/5 to-[#0A0F1C] border border-[#D4AF37]/30 shadow-2xl relative overflow-hidden">
-                              <div className="absolute top-0 right-0 w-32 h-full bg-[#D4AF37]/5 blur-2xl pointer-events-none" />
-                              <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <DollarSign className="w-4 h-4 text-[#D4AF37]" /> Live Cost Estimate Breakdown
+                            <div className="bg-white/3 border border-white/5 rounded-2xl p-5 space-y-4">
+                              <h4 className="font-bold text-white text-sm uppercase tracking-wider text-[#D4AF37] flex items-center gap-2">
+                                <Shield className="w-4 h-4 text-[#D4AF37]" /> Smart Checklist: Required Documentation
                               </h4>
+                              
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {(checklistsByService[formData.service] || ["International Passport", "Driver License / ID Card", "Utility Bill / Proof of Address"]).map((item) => {
+                                  const checked = formData.checklist.includes(item);
+                                  return (
+                                    <button
+                                      key={item}
+                                      type="button"
+                                      onClick={() => toggleChecklistItem(item)}
+                                      className={`flex items-center gap-3 p-3 rounded-xl border text-left text-xs transition-all duration-300
+                                        ${checked 
+                                          ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-white font-semibold' 
+                                          : 'bg-[#020617] border-white/5 text-white/50 hover:border-white/20'}`}
+                                    >
+                                      <div className="shrink-0">
+                                        {checked 
+                                          ? <CheckSquare className="w-4 h-4 text-[#D4AF37] animate-[scale_0.2s_ease-out]" /> 
+                                          : <Square className="w-4 h-4 text-white/30" />
+                                        }
+                                      </div>
+                                      <span>{item}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              
+                              {!checklistsByService[formData.service] && (
+                                <p className="text-[11px] text-[#D4AF37] italic mt-2">
+                                  Note: Sourcing & General Consultations do not require mandatory document sifting. We've preloaded standard identification checklists for you.
+                                </p>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
 
-                              <div className="space-y-2 border-b border-white/5 pb-4 mb-4">
-                                {Object.entries(costBreakdown.breakdown).map(([desc, price]) => (
-                                  <div key={desc} className="flex justify-between text-xs text-white/70">
-                                    <span className="font-light">{desc}</span>
-                                    <span className="font-mono">${price} USD</span>
+                        {/* STEP 4: APPOINTMENT BOOKING */}
+                        {activeStep === 4 && (
+                          <motion.div
+                            key="step4"
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: 20, opacity: 0 }}
+                            className="space-y-6"
+                          >
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                              <div>
+                                <h3 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                                  <Calendar className="w-6 h-6 text-[#D4AF37]" /> Appointment Scheduling
+                                </h3>
+                                <p className="text-white/50 text-sm font-light">Select a date and direct slot to meet our international coordinators.</p>
+                              </div>
+                              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold shrink-0">
+                                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                <span>Only 2 consultation slots left today!</span>
+                              </div>
+                            </div>
+
+                            {/* Service Duration Alert */}
+                            <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs rounded-xl flex items-start gap-2.5">
+                              <Clock className="w-4 h-4 mt-0.5 shrink-0" />
+                              <div>
+                                <p className="font-bold uppercase tracking-wider text-[10px]">Consultation Duration Rules</p>
+                                <p className="text-white/70 font-light mt-0.5">
+                                  {formData.service === "Study Visa Guidance" && "🎓 Study Visa Consultations run for 45 minutes."}
+                                  {formData.service === "Work Permit Consultation" && "💼 Work Permit Consultations run for 60 minutes."}
+                                  {formData.service === "Electronics & Tech Shipping" && "📱 Electronics Shipping Consultations run for 15 minutes."}
+                                  {formData.service !== "Study Visa Guidance" && formData.service !== "Work Permit Consultation" && formData.service !== "Electronics & Tech Shipping" && "🌐 Sourcing, Logistics & Cargo Consultations run for 30 minutes."}
+                                  <span className="text-[#D4AF37] font-semibold ml-1">The first 30 minutes are 100% FREE. Subsequent hours are billed hourly.</span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Consultation Types cards */}
+                            <div className="grid grid-cols-3 gap-3">
+                              {[
+                                { type: "Video Consultation", icon: Video, label: "Video Call", desc: "Google Meet / Zoom" },
+                                { type: "Telegram Consultation", icon: Send, label: "Telegram Support", desc: "Secure Direct Voice/Chat" },
+                                { type: "Phone Consultation", icon: Phone, label: "Phone Direct", desc: "Local Standard Call" }
+                              ].map(item => {
+                                const active = formData.consultationType === item.type;
+                                return (
+                                  <button
+                                    key={item.type}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, consultationType: item.type })}
+                                    className={`p-3 rounded-2xl border text-center transition-all duration-300
+                                      ${active 
+                                        ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-white shadow-[0_0_15px_rgba(212,175,55,0.15)]' 
+                                        : 'bg-[#020617] border-white/5 text-white/50 hover:border-white/20'}`}
+                                  >
+                                    <item.icon className={`w-5 h-5 mx-auto mb-2 ${active ? 'text-[#D4AF37]' : 'text-white/40'}`} />
+                                    <p className="text-xs font-bold truncate">{item.label}</p>
+                                    <p className="text-[9px] text-white/40 truncate">{item.desc}</p>
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {/* Calendar Grid & Time Slots */}
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 bg-white/2 border border-white/5 p-5 rounded-2xl">
+                              
+                              {/* Calendar Column */}
+                              <div className="md:col-span-7 space-y-4">
+                                <div className="flex justify-between items-center bg-white/3 p-2 rounded-xl border border-white/5">
+                                  <button 
+                                    type="button"
+                                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+                                    className="p-1 rounded hover:bg-white/5 text-white/60 hover:text-white"
+                                  >
+                                    <ChevronLeft className="w-5 h-5" />
+                                  </button>
+                                  <span className="text-xs font-bold text-white uppercase tracking-widest">
+                                    {currentMonth.toLocaleString("default", { month: "long", year: "numeric" })}
+                                  </span>
+                                  <button 
+                                    type="button"
+                                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+                                    className="p-1 rounded hover:bg-white/5 text-white/60 hover:text-white"
+                                  >
+                                    <ChevronRight className="w-5 h-5" />
+                                  </button>
+                                </div>
+
+                                <div className="grid grid-cols-7 gap-1 text-center">
+                                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => (
+                                    <span key={d} className="text-[10px] text-white/30 font-bold uppercase">{d}</span>
+                                  ))}
+                                  {getDaysInMonth(currentMonth).map((day, idx) => {
+                                    if (!day) return <div key={`empty-${idx}`} />;
+                                    
+                                    const isPast = day.getTime() < new Date().setHours(0,0,0,0);
+                                    const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+                                    const isSelected = formData.bookingDate === day.toDateString();
+                                    // Wednesdays/Fridays are limited
+                                    const isLimited = day.getDay() === 3 || day.getDay() === 5;
+
+                                    return (
+                                      <button
+                                        key={day.toDateString()}
+                                        type="button"
+                                        disabled={isPast || isWeekend}
+                                        onClick={() => setFormData({ ...formData, bookingDate: day.toDateString(), bookingTime: "" })}
+                                        className={`p-2 rounded-xl text-xs flex flex-col items-center justify-between min-h-[42px] transition-all relative border
+                                          ${isSelected 
+                                            ? 'bg-[#D4AF37] text-black border-[#D4AF37] font-bold shadow-[0_0_15px_rgba(212,175,55,0.4)]' 
+                                            : isWeekend || isPast
+                                              ? 'text-white/10 border-transparent cursor-not-allowed'
+                                              : 'bg-[#020617] border-white/5 hover:border-white/20 text-white'}`}
+                                      >
+                                        <span>{day.getDate()}</span>
+                                        {!isPast && !isWeekend && (
+                                          <span className={`w-1 h-1 rounded-full ${isLimited ? 'bg-amber-400' : 'bg-green-400'}`} />
+                                        )}
+                                        {isWeekend && !isPast && (
+                                          <span className="text-[6px] text-red-500 scale-75 font-semibold leading-none uppercase">Full</span>
+                                        )}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              {/* Time Slots Column */}
+                              <div className="md:col-span-5 flex flex-col justify-start space-y-4">
+                                <h4 className="text-[10px] font-bold text-white/50 uppercase tracking-widest border-b border-white/5 pb-2">Available Slots</h4>
+                                
+                                {formData.bookingDate ? (
+                                  <div className="grid grid-cols-1 gap-2 overflow-y-auto max-h-[190px] pr-1">
+                                    {[
+                                      "09:00 AM", "10:00 AM", "11:30 AM", 
+                                      "01:00 PM", "02:30 PM", "03:30 PM", "04:00 PM"
+                                    ].map(slot => {
+                                      const active = formData.bookingTime === slot;
+                                      
+                                      // Deterministically mock slots booked for specific days
+                                      const parsedDate = new Date(formData.bookingDate);
+                                      const dateNum = parsedDate.getDate();
+                                      const isBooked = (dateNum % 3 === 0 && slot === "10:00 AM") || 
+                                                        (dateNum % 4 === 0 && slot === "01:00 PM") || 
+                                                        (dateNum % 2 === 0 && slot === "03:30 PM");
+
+                                      return (
+                                        <button
+                                          key={slot}
+                                          type="button"
+                                          disabled={isBooked}
+                                          onClick={() => setFormData({ ...formData, bookingTime: slot })}
+                                          className={`py-2 px-3 rounded-xl border text-center text-xs font-semibold transition-all
+                                            ${active 
+                                              ? 'bg-blue-600 border-blue-500 text-white font-bold' 
+                                              : isBooked
+                                                ? 'bg-white/1 border-transparent text-white/10 cursor-not-allowed line-through'
+                                                : 'bg-[#020617] border-white/5 text-white/70 hover:border-white/20'}`}
+                                        >
+                                          {isBooked ? `${slot} (Booked)` : slot}
+                                        </button>
+                                      );
+                                    })}
                                   </div>
-                                ))}
+                                ) : (
+                                  <div className="flex flex-col items-center justify-center py-10 bg-white/1 border border-white/5 rounded-2xl text-center flex-1">
+                                    <Calendar className="w-8 h-8 text-white/20 mb-2" />
+                                    <p className="text-[10px] text-white/40 max-w-[150px] mx-auto leading-relaxed">Select an open calendar date to view time slots.</p>
+                                  </div>
+                                )}
                               </div>
 
-                              <div className="flex justify-between items-center text-white">
-                                <span className="font-bold text-sm tracking-wide">Estimated Retainer Total</span>
-                                <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-yellow-200 font-mono">
-                                  ${costBreakdown.total} USD
-                                </span>
+                            </div>
+
+                            {/* Timezone Detection and Swapping Selector */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 rounded-xl bg-[#020617] border border-white/5 gap-3">
+                              <span className="text-[11px] text-white/50 flex items-center gap-2">
+                                <Globe className="w-3.5 h-3.5 text-blue-400" />
+                                <span>Timezone auto-detected: <strong className="text-white">{formData.bookingTimezone}</strong></span>
+                              </span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-[10px] text-white/40 uppercase">Switch:</span>
+                                <select
+                                  value={formData.bookingTimezone}
+                                  onChange={(e) => setFormData({ ...formData, bookingTimezone: e.target.value })}
+                                  className="bg-[#0A0F1C] border border-white/10 rounded px-2 py-1 text-[10px] text-white outline-none"
+                                >
+                                  <option value="UTC">UTC</option>
+                                  <option value="EST">EST (New York)</option>
+                                  <option value="GMT">GMT (London)</option>
+                                  <option value="GMT+1">GMT+1 (West Africa)</option>
+                                  <option value="PST">PST (Pacific)</option>
+                                  <option value="CET">CET (Central Europe)</option>
+                                </select>
                               </div>
-                              <p className="text-[10px] text-white/30 italic mt-2">Note: This is a simulated estimate. Sourcing quotes vary per custom requirements.</p>
+                            </div>
+
+                          </motion.div>
+                        )}
+
+                        {/* STEP 5: REVIEW & FINAL SUBMIT */}
+                        {activeStep === 5 && (
+                          <motion.div
+                            key="step5"
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: 20, opacity: 0 }}
+                            className="space-y-5"
+                          >
+                            <h3 className="text-2xl font-bold text-white tracking-tight">Review & Booking Confirmation</h3>
+                            <p className="text-white/50 text-sm font-light">Confirm your live estimate, checklist completion, and appointment details.</p>
+
+                            {/* Summary Invoice & Appointment Card */}
+                            <div className="p-5 rounded-2xl bg-gradient-to-br from-white/5 to-[#0A0F1C] border border-[#D4AF37]/30 shadow-2xl relative overflow-hidden space-y-4">
+                              <div className="absolute top-0 right-0 w-32 h-full bg-[#D4AF37]/5 blur-2xl pointer-events-none" />
+                              
+                              <div className="flex justify-between items-start border-b border-white/5 pb-3">
+                                <div>
+                                  <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Consultation details</h4>
+                                  <p className="text-sm font-bold text-white mt-0.5">{formData.service}</p>
+                                </div>
+                                <div className="text-right">
+                                  <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20">
+                                    {formData.consultationType.replace(" Consultation", "")}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4 text-xs border-b border-white/5 pb-3">
+                                <div>
+                                  <p className="text-white/40 text-[9px] uppercase font-bold">Scheduled date</p>
+                                  <p className="font-semibold text-white mt-0.5">{formData.bookingDate || "Not Selected"}</p>
+                                </div>
+                                <div>
+                                  <p className="text-white/40 text-[9px] uppercase font-bold">Scheduled time & tz</p>
+                                  <p className="font-semibold text-white mt-0.5">{formData.bookingTime || "Not Selected"} ({formData.bookingTimezone})</p>
+                                </div>
+                              </div>
+
+                              {/* Document checklist completion status */}
+                              <div className="space-y-1">
+                                <p className="text-white/40 text-[9px] uppercase font-bold">Onboarding documentation checklist</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <div className="flex-grow bg-white/5 h-2 rounded-full overflow-hidden">
+                                    <div 
+                                      className="bg-green-500 h-full rounded-full transition-all" 
+                                      style={{ width: `${(formData.checklist.length / ((checklistsByService[formData.service] || ["International Passport", "Driver License / ID Card", "Utility Bill / Proof of Address"]).length)) * 100}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-[10px] font-bold text-green-400 font-mono shrink-0">
+                                    {formData.checklist.length}/{(checklistsByService[formData.service] || ["International Passport", "Driver License / ID Card", "Utility Bill / Proof of Address"]).length} docs
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Fee Invoice Estimate */}
+                              <div className="bg-black/40 p-4 rounded-xl border border-white/5 space-y-2">
+                                <div className="flex justify-between text-xs text-white/50 font-light">
+                                  <span>Service Consultation Retainer Fee</span>
+                                  <span className="font-mono">${costBreakdown.total} USD</span>
+                                </div>
+                                <div className="flex justify-between text-xs text-green-400 font-bold border-t border-white/5 pt-2">
+                                  <span>Consultation Promotion Credit</span>
+                                  <span className="font-mono">-$30.00 USD</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-white font-black border-t border-white/10 pt-2">
+                                  <span>Estimated Total Retainer Deposit</span>
+                                  <span className="font-mono text-[#D4AF37]">${Math.max(0, costBreakdown.total - 30)} USD</span>
+                                </div>
+                              </div>
                             </div>
 
                             {/* Drag and Drop Document Upload Zone */}
@@ -1063,7 +1421,7 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                                 onDragLeave={handleDrag}
                                 onDragOver={handleDrag}
                                 onDrop={handleDrop}
-                                className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-colors duration-300 relative bg-white/3
+                                className={`border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-colors duration-300 relative bg-white/3
                                   ${isDragActive ? 'border-[#D4AF37] bg-[#D4AF37]/5' : 'border-white/10 hover:border-white/20'}`}
                               >
                                 <input 
@@ -1072,39 +1430,39 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                                   onChange={handleFileInput}
                                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                 />
-                                <UploadCloud className="w-8 h-8 text-[#D4AF37] mx-auto mb-2" />
-                                <p className="text-sm text-white/80 font-bold mb-1">Drag & Drop files here, or <span className="text-[#D4AF37]">browse</span></p>
-                                <p className="text-[10px] text-white/40">Supports JPG, PNG, PDF formats up to 10MB per file.</p>
+                                <UploadCloud className="w-6 h-6 text-[#D4AF37] mx-auto mb-1.5" />
+                                <p className="text-xs text-white/80 font-bold mb-0.5">Drag & Drop files here, or <span className="text-[#D4AF37]">browse</span></p>
+                                <p className="text-[9px] text-white/40">Supports JPG, PNG, PDF formats up to 10MB per file.</p>
                               </div>
 
                               {/* Uploaded Files Milestones */}
                               {uploadedFiles.length > 0 && (
-                                <div className="space-y-2 mt-4">
+                                <div className="space-y-2 mt-2 max-h-[100px] overflow-y-auto pr-1">
                                   {uploadedFiles.map(file => (
-                                    <div key={file.name} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-white">
-                                      <div className="flex items-center gap-3 flex-grow">
-                                        <FileText className="w-5 h-5 text-blue-400 shrink-0" />
-                                        <div className="flex-grow">
-                                          <p className="font-semibold text-white/90 truncate max-w-[180px]">{file.name}</p>
-                                          <p className="text-[10px] text-white/40">{file.size}</p>
+                                    <div key={file.name} className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 text-[10px] text-white">
+                                      <div className="flex items-center gap-2 flex-grow truncate">
+                                        <FileText className="w-4 h-4 text-blue-400 shrink-0" />
+                                        <div className="truncate">
+                                          <p className="font-semibold text-white/90 truncate max-w-[150px]">{file.name}</p>
+                                          <p className="text-[8px] text-white/40">{file.size}</p>
                                         </div>
                                       </div>
                                       
-                                      <div className="flex items-center gap-4 shrink-0">
+                                      <div className="flex items-center gap-3 shrink-0">
                                         {!file.completed ? (
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-16 bg-white/10 h-1 rounded-full overflow-hidden">
+                                          <div className="flex items-center gap-1.5">
+                                            <div className="w-12 bg-white/10 h-1 rounded-full overflow-hidden">
                                               <div className="bg-[#D4AF37] h-full" style={{ width: `${file.progress}%` }} />
                                             </div>
-                                            <span className="text-[10px] font-mono text-white/50">{file.progress}%</span>
+                                            <span className="text-[8px] font-mono text-white/50">{file.progress}%</span>
                                           </div>
                                         ) : (
-                                          <span className="flex items-center gap-1 text-green-400 text-[10px] font-bold">
-                                            <Check className="w-3.5 h-3.5 stroke-[3]" /> Uploaded
+                                          <span className="flex items-center gap-1 text-green-400 text-[8px] font-bold">
+                                            <Check className="w-3 h-3 stroke-[3]" /> Staged
                                           </span>
                                         )}
                                         <button type="button" onClick={() => removeFile(file.name)} className="text-white/40 hover:text-red-400 transition-colors">
-                                          <Trash2 className="w-4 h-4" />
+                                          <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                       </div>
                                     </div>
@@ -1113,10 +1471,39 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                               )}
                             </div>
 
+                            {/* Direct Calendar Invite Links Option */}
+                            <div className="p-3.5 rounded-xl bg-[#020617] border border-white/5 space-y-2.5">
+                              <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider">📅 Export Invite Links (Massive professionalism boost):</p>
+                              <div className="flex flex-wrap gap-2 text-[10px] font-bold">
+                                <a 
+                                  href={getGoogleCalendarLink()}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-3 py-1.5 rounded-lg bg-blue-600/10 text-blue-400 hover:bg-blue-600/20 border border-blue-500/20 transition-colors flex items-center gap-1.5"
+                                >
+                                  Google Calendar
+                                </a>
+                                <a 
+                                  href={getIcsDownloadLink()}
+                                  download="INTMOVE_Consultation.ics"
+                                  className="px-3 py-1.5 rounded-lg bg-amber-500/10 text-[#D4AF37] hover:bg-amber-500/20 border border-amber-500/20 transition-colors flex items-center gap-1.5"
+                                >
+                                  Outlook Calendar (.ics)
+                                </a>
+                                <a 
+                                  href={getIcsDownloadLink()}
+                                  download="INTMOVE_Consultation.ics"
+                                  className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors flex items-center gap-1.5"
+                                >
+                                  Apple iCal (.ics)
+                                </a>
+                              </div>
+                            </div>
+
                             {/* Contact Method Selector */}
-                            <div className="p-4 rounded-xl bg-white/3 border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-3.5 rounded-xl bg-white/3 border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-xs font-semibold text-white/60 mb-2 uppercase tracking-wider">Preferred Contact Method</label>
+                                <label className="block text-[10px] font-bold text-white/60 mb-1.5 uppercase tracking-wider">Preferred Contact Channel</label>
                                 <select 
                                   value={formData.contactMethod}
                                   onChange={(e) => setFormData({...formData, contactMethod: e.target.value})}
@@ -1127,9 +1514,9 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                                   <option value="Phone Call">Phone Direct ({formData.phone || 'no phone provided'})</option>
                                 </select>
                               </div>
-                              <div className="flex items-start gap-3 text-[11px] text-white/40 leading-relaxed font-light self-center">
-                                <Shield className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                                <span>We prioritize Telegram contact, routing you directly to corresponding logistical experts to guarantee assistance within 3 minutes.</span>
+                              <div className="flex items-start gap-2.5 text-[10px] text-white/40 leading-relaxed font-light self-center">
+                                <Shield className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                                <span>We prioritize Telegram contact, routing you directly to corresponding specialists to guarantee same-day bookings.</span>
                               </div>
                             </div>
 
@@ -1178,12 +1565,16 @@ Sent via INTMOVE Global Consultation Onboarding System`;
                         </button>
                       )}
 
-                      {activeStep < 3 ? (
+                      {activeStep < 5 ? (
                         <button
                           type="button"
                           onClick={() => {
                             if (activeStep === 1 && (!formData.name || !formData.email || !formData.telegram || !formData.residence || !formData.destination)) {
                               alert("Please fill in all required fields marked with * before proceeding.");
+                              return;
+                            }
+                            if (activeStep === 4 && (!formData.bookingDate || !formData.bookingTime)) {
+                              alert("Please select a date and an available time slot for your consultation.");
                               return;
                             }
                             setActiveStep(prev => prev + 1);

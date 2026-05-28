@@ -3,9 +3,9 @@ import { Plane, Globe, Mail, Phone, MapPin } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-[#0B132B] pt-20 pb-10 border-t border-white/10 relative overflow-hidden">
+    <footer className="bg-[#050505] pt-20 pb-10 border-t border-white/5 relative overflow-hidden">
       {/* Decorative element */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent opacity-50" />
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent opacity-30" />
       
       <div className="container mx-auto px-6 md:px-12 max-w-7xl relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
@@ -99,13 +99,18 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/40 text-sm">
             &copy; {new Date().getFullYear()} FENWAY4U. All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm text-white/40">
-            <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
+          <div className="flex flex-wrap justify-center gap-6 text-xs text-white/40">
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>
+            <Link href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link>
+            <Link href="/security" className="hover:text-white transition-colors flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              Security & Trust Center
+            </Link>
           </div>
         </div>
       </div>

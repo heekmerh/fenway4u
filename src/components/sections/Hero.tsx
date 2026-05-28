@@ -14,11 +14,11 @@ export function Hero() {
           src="/hero-bg.png"
           alt="International Logistics"
           fill
-          className="object-cover opacity-35 mix-blend-luminosity scale-105 pointer-events-none"
+          className="object-cover opacity-75 scale-105 pointer-events-none"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/95 via-[#050505]/75 to-transparent z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/30 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/90 via-[#050505]/45 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/80 via-transparent to-transparent z-10" />
       </div>
 
       <div className="container relative z-20 mx-auto px-6 md:px-12 max-w-7xl h-full flex items-center pt-16">

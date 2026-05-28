@@ -39,11 +39,18 @@ export function Footer() {
           <div>
             <h3 className="text-white font-semibold text-lg mb-6">Quick Links</h3>
             <ul className="space-y-4">
-              {['Home', 'Services', 'Destinations', 'How It Works', 'Get a Quote', 'Track Shipment'].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm flex items-center gap-2">
+              {[
+                { name: 'Home', href: '/' },
+                { name: 'Services', href: '/#services' },
+                { name: 'Destinations', href: '/#destinations' },
+                { name: 'How It Works', href: '/#how-it-works' },
+                { name: 'Get a Quote', href: '/#quote' },
+                { name: 'Security & Trust', href: '/security' },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link href={item.href} className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]/50"></span>
-                    {item}
+                    {item.name}
                   </Link>
                 </li>
               ))}
@@ -54,11 +61,19 @@ export function Footer() {
           <div>
             <h3 className="text-white font-semibold text-lg mb-6">Our Services</h3>
             <ul className="space-y-4">
-              {['Immigration Support', 'Vehicle Shipping', 'Electronics Logistics', 'Shop & Ship', 'Air Freight', 'Sea Freight'].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]/50"></span>
-                    {item}
+              {[
+                { name: 'Immigration Support', href: '/relocation-support' },
+                { name: 'Vehicle Shipping', href: '/car-shipping' },
+                { name: 'Electronics Logistics', href: '/electronics-shipping' },
+                { name: 'Shop & Ship', href: '/shop-for-me' },
+                { name: 'Air Freight', href: '/air-freight' },
+                { name: 'Sea Freight', href: '/sea-freight' },
+                { name: 'International Storage', href: '/storage' },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link href={item.href} className="text-white/60 hover:text-[#D4AF37] transition-colors text-sm flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]/50 animate-pulse shrink-0"></span>
+                    {item.name}
                   </Link>
                 </li>
               ))}

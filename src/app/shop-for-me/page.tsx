@@ -67,7 +67,7 @@ const premiumServices = [
   { title: "Exclusive Item Sourcing", desc: "We find rare or hard-to-get products like limited luxury bags or sold-out electronics.", icon: Star },
   { title: "Bulk Buying Assistance", desc: "Sourcing wholesale inventory and commercial goods for resellers and small businesses.", icon: Building2 },
   { title: "African Care Packages", desc: "Taste of Home boxes, student survival packages, and fresh local groceries sourced with care.", icon: Heart },
-  { title: "Warehouse Consolidation", desc: "Combine multiple orders to reduce shipping costs and store items temporarily.", icon: Package }
+  { title: "Warehouse Consolidation", desc: "Combine multiple orders to reduce shipping costs and store items temporarily in our secure global hubs.", icon: Package, href: "/storage" }
 ];
 
 const africanMarketplace = [
@@ -672,20 +672,44 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {premiumServices.map((service, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="bg-[#0a0a0a] p-8 rounded-2xl border border-white/5 hover:border-[#D4AF37]/20 transition-colors relative overflow-hidden"
-              >
-                <service.icon className="w-8 h-8 text-[#D4AF37] mb-6" />
-                <h3 className="font-bold text-lg mb-3">{service.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{service.desc}</p>
-              </motion.div>
-            ))}
+            {premiumServices.map((service, idx) => {
+              const CardContent = (
+                <>
+                  {service.title === "Warehouse Consolidation" && (
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-[#D4AF37]/15 transition-colors" />
+                  )}
+                  <service.icon className="w-8 h-8 text-[#D4AF37] mb-6 group-hover:scale-110 transition-transform" />
+                  <h3 className="font-bold text-lg mb-3 text-white">{service.title}</h3>
+                  <p className="text-white/50 text-sm leading-relaxed mb-4">{service.desc}</p>
+                  {service.href && (
+                    <span className="inline-flex items-center text-xs font-bold text-[#D4AF37] group-hover:text-yellow-300 transition-colors gap-1.5 mt-auto">
+                      Explore Storage Hub <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  )}
+                </>
+              );
+
+              return service.href ? (
+                <Link
+                  key={idx}
+                  href={service.href}
+                  className="bg-[#0a0a0a] p-8 rounded-2xl border border-white/5 hover:border-[#D4AF37]/45 hover:bg-white/5 transition-all group flex flex-col justify-between relative overflow-hidden"
+                >
+                  {CardContent}
+                </Link>
+              ) : (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="bg-[#0a0a0a] p-8 rounded-2xl border border-white/5 hover:border-white/10 transition-all group flex flex-col justify-between relative overflow-hidden"
+                >
+                  {CardContent}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

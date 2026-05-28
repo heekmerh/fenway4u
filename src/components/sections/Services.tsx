@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GraduationCap, Briefcase, Home, Car, Smartphone, Plane, Ship, ShieldAlert, ShoppingBag, ArrowRight } from "lucide-react";
+import { GraduationCap, Briefcase, Home, Car, Smartphone, Plane, Ship, ShieldAlert, ShoppingBag, ArrowRight, Warehouse } from "lucide-react";
 import Link from "next/link";
 
 const services = [
@@ -14,6 +14,7 @@ const services = [
   { icon: Ship, title: "Sea Freight", desc: "Cost-effective bulk shipping solutions.", href: "/sea-freight" },
   { icon: ShieldAlert, title: "Customs Clearance", desc: "Hassle-free customs brokerage.", href: "/customs-clearance" },
   { icon: ShoppingBag, title: "Shop For Me Service", desc: "We buy and ship products for you globally.", href: "/shop-for-me" },
+  { icon: Warehouse, title: "International Storage", desc: "Secure package holding & consolidation hubs.", href: "/storage" },
 ];
 
 export function Services() {

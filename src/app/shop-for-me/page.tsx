@@ -476,7 +476,7 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
               transition={{ delay: 0.2 }}
               className="text-xl text-white/60 mb-10 leading-relaxed font-light max-w-2xl"
             >
-              Your personal international buying assistant. We purchase, receive, package, and ship luxury products, electronics, and emotional care packages globally.
+              Your personal global buying assistant. We source not just high-end goods, but physical memories — vacuum-sealed authentic groceries, traditional garments, and nostalgic spices that bridge the distance and make you feel connected to home.
             </motion.p>
             
             <motion.div 

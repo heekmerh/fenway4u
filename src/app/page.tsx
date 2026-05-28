@@ -8,6 +8,9 @@ import { QuoteCalculator } from "@/components/sections/QuoteCalculator";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { FAQ } from "@/components/sections/FAQ";
 import { FinalCTA } from "@/components/sections/FinalCTA";
+import { GlobalMap } from "@/components/sections/GlobalMap";
+import { SuccessMetrics } from "@/components/sections/SuccessMetrics";
+import { ClientJourneys } from "@/components/sections/ClientJourneys";
 
 export default function Home() {
   return (
@@ -15,9 +18,12 @@ export default function Home() {
       <Hero />
       <TrustBadges />
       <Services />
+      <GlobalMap />
       <Destinations />
+      <SuccessMetrics />
       <ShippingCategories />
       <HowItWorks />
+      <ClientJourneys />
       <QuoteCalculator />
       <Testimonials />
       <FAQ />

@@ -19,10 +19,11 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: "Services", href: "#services" },
-    { name: "Destinations", href: "#destinations" },
-    { name: "How It Works", href: "#how-it-works" },
-    { name: "Quote", href: "#quote" },
+    { name: "Services", href: "/#services" },
+    { name: "Destinations", href: "/#destinations" },
+    { name: "How It Works", href: "/#how-it-works" },
+    { name: "Quote", href: "/#quote" },
+    { name: "B2B Solutions", href: "/b2b", highlight: true },
   ];
 
   return (
@@ -47,17 +48,31 @@ export function Navbar() {
             <Link
               key={link.name}
               href={link.href}
-              className="text-sm font-medium text-white/80 hover:text-white transition-colors"
+              className={cn(
+                "text-sm font-medium transition-all duration-300 flex items-center gap-1.5",
+                link.highlight 
+                  ? "text-[#D4AF37] hover:text-yellow-300 font-bold bg-[#D4AF37]/5 px-3.5 py-1 rounded-full border border-[#D4AF37]/20 hover:border-[#D4AF37]/40 shadow-[0_0_10px_rgba(212,175,55,0.05)]" 
+                  : "text-white/80 hover:text-white"
+              )}
             >
               {link.name}
+              {link.highlight && (
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#D4AF37]"></span>
+                </span>
+              )}
             </Link>
           ))}
-          <Link
-            href="#contact"
-            className="px-6 py-2.5 rounded-full bg-[#D4AF37] text-[#0B132B] font-semibold hover:bg-[#F3C332] transition-colors shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_25px_rgba(212,175,55,0.6)]"
+          <button
+            onClick={() => {
+              const event = new CustomEvent("open-contact-modal");
+              window.dispatchEvent(event);
+            }}
+            className="px-6 py-2.5 rounded-full bg-[#D4AF37] text-black font-extrabold text-xs tracking-wider uppercase hover:bg-[#F3C332] transition-colors shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_25px_rgba(212,175,55,0.6)] cursor-pointer"
           >
             Get Consultation
-          </Link>
+          </button>
         </div>
 
         {/* Mobile Menu Button */}
@@ -80,19 +95,26 @@ export function Navbar() {
             <Link
               key={link.name}
               href={link.href}
-              className="text-lg font-medium text-white/90 hover:text-[#D4AF37] transition-colors"
+              className={cn(
+                "text-lg font-medium transition-colors flex items-center gap-2",
+                link.highlight ? "text-[#D4AF37] font-bold" : "text-white/90 hover:text-[#D4AF37]"
+              )}
               onClick={() => setIsOpen(false)}
             >
               {link.name}
+              {link.highlight && <span className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-ping" />}
             </Link>
           ))}
-          <Link
-            href="#contact"
-            className="w-full text-center px-6 py-3 mt-4 rounded-lg bg-[#D4AF37] text-[#0B132B] font-bold"
-            onClick={() => setIsOpen(false)}
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              const event = new CustomEvent("open-contact-modal");
+              window.dispatchEvent(event);
+            }}
+            className="w-full text-center px-6 py-3.5 mt-4 rounded-xl bg-[#D4AF37] text-black font-extrabold text-xs tracking-wider uppercase cursor-pointer"
           >
             Get Consultation
-          </Link>
+          </button>
         </motion.div>
       )}
     </motion.nav>

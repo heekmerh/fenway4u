@@ -176,9 +176,9 @@ Thank you.`;
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-xl text-white/60 mb-10 leading-relaxed font-light mx-auto max-w-3xl"
+              className="text-xl text-white/70 mb-10 leading-relaxed font-light mx-auto max-w-3xl"
             >
-              Professional relocation and visiting visa support designed to simplify international travel, temporary stays, and long-term settlement.
+              We don't just manage visa filings — FENWAY4U delivers connection, comfort, and belonging. We are your bridge between continents, families, and opportunities, helping you step boldly into your future global lifestyle while keeping you connected to your cultural roots.
             </motion.p>
             
             <motion.div 

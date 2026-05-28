@@ -212,12 +212,12 @@ Sent via FENWAY4U Corporate B2B Portal.`;
       {/* Cinematic Hero */}
       <section className="relative py-20 px-6 overflow-hidden border-b border-white/5 bg-[#090909]/60">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/45 to-transparent z-10" />
           <Image 
             src="/images/sea_freight_test_1_1779128965828.png" 
             alt="Cinematic Container Port Terminal"
             fill
-            className="object-cover opacity-20 pointer-events-none"
+            className="object-cover opacity-75 pointer-events-none"
             priority
           />
         </div>

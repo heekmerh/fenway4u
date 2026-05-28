@@ -10,7 +10,7 @@ import {
   Globe, Truck, ChevronDown, ArrowRight, MessageCircle, 
   UploadCloud, Compass, CreditCard, Building2, MapPin, Mail,
   Plus, Trash2, HelpCircle, Check, PlusCircle, CheckCircle, 
-  AlertCircle, ChevronUp, FileText, Sparkles
+  AlertCircle, ChevronUp, FileText, Sparkles, X, Calendar, Boxes, Maximize2
 } from "lucide-react";
 
 // --- Data Structures ---
@@ -161,6 +161,131 @@ export default function ShopForMePage() {
   const [uploadedFoodFiles, setUploadedFoodFiles] = useState<UploadedFile[]>([]);
   const [isDragActive, setIsDragActive] = useState(false);
   const [restoreDraftAvailable, setRestoreDraftAvailable] = useState(false);
+
+  // --- Package Subscription Management System States ---
+  const [activeSubPlan, setActiveSubPlan] = useState<string | null>(null);
+  const [subItems, setSubItems] = useState<any[]>([]);
+  const [subDestination, setSubDestination] = useState({
+    country: "United States",
+    address: "",
+    recipient: "",
+    phone: ""
+  });
+  const [subShippingSpeed, setSubShippingSpeed] = useState("express");
+  const [tempQuantityScale, setTempQuantityScale] = useState<number>(1.0); // 1.0, 1.2, 1.5
+  const [autoReplenish, setAutoReplenish] = useState<boolean>(true);
+  const [subBudgetCap, setSubBudgetCap] = useState<number>(400);
+  const [subRescheduleDate, setSubRescheduleDate] = useState<string>("2026-06-15");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAddItemOpen, setIsAddItemOpen] = useState(false);
+  const [isConfirmDeleteId, setIsConfirmDeleteId] = useState<string | null>(null);
+  const [subConfirmSuccess, setSubConfirmSuccess] = useState(false);
+  const [isSkipActive, setIsSkipActive] = useState(false);
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+
+  // Preloaded items per plan
+  const subPlanPresets: { [key: string]: any[] } = {
+    essential: [
+      { id: "sub-es-1", name: "Ijebu Garri", qty: 2, unit: "KG", freq: "Every Month" },
+      { id: "sub-es-2", name: "Indomie Noodles", qty: 1, unit: "Cartons", freq: "Every Month" },
+      { id: "sub-es-3", name: "Suya Spice & Chin Chin", qty: 3, unit: "Packs", freq: "Every Month" },
+      { id: "sub-es-4", name: "Plantain Chips", qty: 5, unit: "Packs", freq: "Every Month" }
+    ],
+    family: [
+      { id: "sub-fa-1", name: "White Garri", qty: 5, unit: "KG", freq: "Every Month" },
+      { id: "sub-fa-2", name: "Egusi & Soup Prep Bundle", qty: 2, unit: "KG", freq: "Every Month" },
+      { id: "sub-fa-3", name: "Nsukka Palm Oil", qty: 3, unit: "Liters", freq: "Every Month" },
+      { id: "sub-fa-4", name: "Smoked Catfish & Snails", qty: 5, unit: "Packs", freq: "Every Month" }
+    ],
+    luxury: [
+      { id: "sub-lx-1", name: "Dedicated Sourcing Hub", qty: 1, unit: "Pieces", freq: "Every Month" },
+      { id: "sub-lx-2", name: "Custom Grocery List Sourcing", qty: 10, unit: "KG", freq: "Every Month" },
+      { id: "sub-lx-3", name: "Luxury Apparel Sourcing Assistance", qty: 1, unit: "Pieces", freq: "Every Month" },
+      { id: "sub-lx-4", name: "Complimentary Freshness Wrapping", qty: 1, unit: "Pieces", freq: "Every Month" }
+    ]
+  };
+
+  const handleSubscribeInit = (planId: string) => {
+    setActiveSubPlan(planId);
+    setSubItems(JSON.parse(JSON.stringify(subPlanPresets[planId] || [])));
+    setTempQuantityScale(1.0);
+    setIsSkipActive(false);
+    setSubConfirmSuccess(false);
+  };
+
+  const handleSubSave = () => {
+    // Compile and open mailto console
+    const planName = activeSubPlan === "essential" ? "Essential Home Box" : activeSubPlan === "luxury" ? "Premium Global Concierge" : "Family Care Package";
+    const estimates = calculateSubPricing();
+    
+    const subject = encodeURIComponent(`Subscription Updated — ${planName}`);
+    const bodyText = `========= SUBSCRIPTION UPDATE NOTIFICATION =========
+Plan: ${planName}
+Status: ${isSkipActive ? "PAUSED / SKIPPED" : "ACTIVE"}
+Replenishment Mode: ${autoReplenish ? "ON-AUTOPILOT" : "MANUAL APPROVAL"}
+Monthly Spending Cap: $${subBudgetCap} USD
+Next Shipping Date: ${subRescheduleDate}
+
+========= DELIVERING RECIPIENT INFORMATION =========
+Name: ${subDestination.recipient || "Not Provided"}
+Phone: ${subDestination.phone || "Not Provided"}
+Address: ${subDestination.address || "Not Provided"}
+Country: ${subDestination.country}
+Shipping Urgency: ${subShippingSpeed.toUpperCase()}
+
+========= DYNAMIC PACKAGE CONFIGURATION =========
+${subItems.map((item, idx) => {
+  return `${idx + 1}. Item: ${item.name} | Qty: ${Math.round(item.qty * tempQuantityScale)} ${item.unit} | Interval: ${item.freq}`;
+}).join("\n")}
+
+========= DYNAMIC PRICING CALCULATIONS =========
+Base Sourcing Subtotal: $${estimates.subtotal} USD
+Live Global Shipping Charge: $${estimates.shipping} USD
+Recurring Subscriber Subsidy (20%): -$${estimates.saving} USD
+----------------------------------------------
+Grand Monthly Total Charge: $${estimates.total} USD
+
+---
+Sent via FENWAY4U Package Subscription Management Dashboard.
+Verification Token: SUB-UPDATE-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const body = encodeURIComponent(bodyText);
+    window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
+    setSubConfirmSuccess(true);
+  };
+
+  const calculateSubPricing = () => {
+    let basePlanRate = 199;
+    if (activeSubPlan === "essential") basePlanRate = 99;
+    else if (activeSubPlan === "luxury") basePlanRate = 399;
+
+    // Adjust base by item scale
+    const baseAdjusted = basePlanRate * tempQuantityScale;
+
+    // Live shipping estimates
+    let baseShipping = 35;
+    if (subShippingSpeed === "priority") baseShipping = 65;
+    else if (subShippingSpeed === "standard") baseShipping = 20;
+
+    // Distance multiplier
+    let countrySurcharge = 15;
+    if (subDestination.country === "Canada") countrySurcharge = 25;
+    else if (subDestination.country === "United Kingdom") countrySurcharge = 10;
+    else if (subDestination.country === "Nigeria / Africa") countrySurcharge = 5;
+    else if (subDestination.country === "Rest of World (Custom Quote)") countrySurcharge = 40;
+
+    const subtotal = Math.round(baseAdjusted);
+    const shipping = Math.round(baseShipping + countrySurcharge);
+    const saving = Math.round((subtotal + shipping) * 0.20); // 20% savings
+    const total = Math.round(subtotal + shipping - saving);
+
+    return {
+      subtotal,
+      shipping,
+      saving,
+      total
+    };
+  };
 
   // Suggestion parameters
   const [focusedRowId, setFocusedRowId] = useState<string | null>(null);
@@ -491,10 +616,10 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
               <button onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))} className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
                 <Truck className="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-transform" /> Get Shipping Estimate
               </button>
-              <Link href="/shop-for-me/subscribe" className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-red-600 hover:to-orange-500 text-white font-bold px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all flex items-center justify-center gap-2 text-lg relative overflow-hidden group">
+              <a href="#subscriptions" className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-red-650 hover:to-orange-500 text-white font-bold px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all flex items-center justify-center gap-2 text-lg relative overflow-hidden group">
                 <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Sparkles className="w-5 h-5 text-orange-200 animate-pulse" /> Subscribe
-              </Link>
+              </a>
             </motion.div>
           </div>
         </div>
@@ -1249,6 +1374,696 @@ Autosave Draft Recovery Code: FOOD-${Math.floor(100000 + Math.random() * 900000)
 
           </AnimatePresence>
         </div>
+      </section>
+
+      {/* NEW — PREMIUM PACKAGE SUBSCRIPTION SECTION */}
+      <section id="subscriptions" className="py-24 px-6 bg-[#050505] relative border-y border-white/5">
+        <div className="absolute top-[20%] left-[-10%] w-[400px] h-[400px] bg-orange-950/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+        
+        <div className="container mx-auto max-w-7xl relative z-10">
+          
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+              <Sparkles className="w-3.5 h-3.5" /> Autopilot Sourcing Tiers
+            </div>
+            <h2 className="text-3xl md:text-5xl font-black mb-4">Package <span className="text-[#D4AF37]">Subscriptions</span></h2>
+            <p className="text-white/50 text-sm md:text-md">
+              Netflix-style subscription management meets luxury global grocery concierge. Automate your monthly delivery, consolidate orders, and save up to 70% in shipping fees with 0% hassle.
+            </p>
+          </div>
+
+          {/* 3 Main Subscription Plans Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            
+            {/* Essential Home Box */}
+            <div className="bg-[#0b0c10] border border-white/5 rounded-3xl p-8 hover:border-blue-500/35 transition-all flex flex-col justify-between relative group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10" />
+              <div>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full">STUDENTS & SOLO</span>
+                    <h3 className="text-2xl font-black text-white mt-3">Essential Home Box</h3>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-mono font-black text-[#D4AF37]">$99</p>
+                    <p className="text-[10px] text-white/30 font-bold uppercase mt-0.5">MONTHLY</p>
+                  </div>
+                </div>
+                <p className="text-white/50 text-xs leading-relaxed mb-6">Perfect for students studying abroad, single professionals, and small households needing a regular taste of native comfort.</p>
+                <div className="border-t border-white/5 pt-4 mb-6">
+                  <p className="text-[10px] font-bold uppercase text-white/40 tracking-wider mb-3">Preloaded Items Included:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Ijebu Garri (2 KG)</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Indomie Noodles (1 Carton)</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Suya Spice & Chin Chin (3 Packs)</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Plantain Chips (5 Packs)</li>
+                  </ul>
+                </div>
+              </div>
+              <button 
+                onClick={() => handleSubscribeInit("essential")}
+                className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs tracking-wider uppercase transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)] cursor-pointer"
+              >
+                Subscribe & Configure
+              </button>
+            </div>
+
+            {/* Family Care Package */}
+            <div className="bg-[#0b0c10] border-2 border-[#D4AF37]/35 rounded-3xl p-8 hover:border-[#D4AF37] transition-all flex flex-col justify-between relative group shadow-[0_0_30px_rgba(212,175,55,0.05)]">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-650 text-white text-[9px] font-bold uppercase px-4 py-1.5 rounded-full border border-orange-500/30 tracking-widest animate-pulse">
+                MOST POPULAR SOURCING
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl -mr-10 -mt-10" />
+              <div>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full">FAMILY VOLUME</span>
+                    <h3 className="text-2xl font-black text-white mt-3">Family Care Package</h3>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-mono font-black text-[#D4AF37]">$199</p>
+                    <p className="text-[10px] text-white/30 font-bold uppercase mt-0.5">MONTHLY</p>
+                  </div>
+                </div>
+                <p className="text-white/50 text-xs leading-relaxed mb-6">Our most requested tier. Tailored for larger households and frequent diaspora shoppers requiring regular cargo consolidation.</p>
+                <div className="border-t border-white/5 pt-4 mb-6">
+                  <p className="text-[10px] font-bold uppercase text-white/40 tracking-wider mb-3">Preloaded Items Included:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> White Garri (5 KG)</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Egusi & Soup Prep (2 KG)</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Nsukka Palm Oil (3 Liters)</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Smoked Catfish & Snails (5 Packs)</li>
+                  </ul>
+                </div>
+              </div>
+              <button 
+                onClick={() => handleSubscribeInit("family")}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 via-[#D4AF37] to-red-650 text-white font-extrabold text-xs tracking-wider uppercase transition-all shadow-[0_0_25px_rgba(212,175,55,0.3)] cursor-pointer"
+              >
+                Subscribe & Configure
+              </button>
+            </div>
+
+            {/* Premium Global Concierge */}
+            <div className="bg-[#0b0c10] border border-white/5 rounded-3xl p-8 hover:border-[#D4AF37]/35 transition-all flex flex-col justify-between relative group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl -mr-10 -mt-10" />
+              <div>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">VIP CONCIERGE</span>
+                    <h3 className="text-2xl font-black text-white mt-3">Premium Global Concierge</h3>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-mono font-black text-[#D4AF37]">$399</p>
+                    <p className="text-[10px] text-white/30 font-bold uppercase mt-0.5">MONTHLY</p>
+                  </div>
+                </div>
+                <p className="text-white/50 text-xs leading-relaxed mb-6">Elite service tier for executives, resellers, and luxury buyers seeking dedicated personal shopping and priority fast-track air shipments.</p>
+                <div className="border-t border-white/5 pt-4 mb-6">
+                  <p className="text-[10px] font-bold uppercase text-white/40 tracking-wider mb-3">Preloaded Items Included:</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Dedicated Personal Sourcing</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Custom Grocery List (10 Items)</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Luxury Apparel Sourcing Settle</li>
+                    <li className="flex items-center gap-2 text-xs text-white/60"><Check className="w-3.5 h-3.5 text-[#D4AF37]" /> Complimentary Freshness Packing</li>
+                  </ul>
+                </div>
+              </div>
+              <button 
+                onClick={() => handleSubscribeInit("luxury")}
+                className="w-full py-3.5 rounded-xl bg-[#D4AF37] hover:bg-yellow-400 text-black font-extrabold text-xs tracking-wider uppercase transition-all shadow-[0_0_20px_rgba(212,175,55,0.2)] cursor-pointer"
+              >
+                Subscribe & Configure
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* FULLSCREEN PACKAGE SUBSCRIPTION MANAGEMENT MODAL EDITOR OVERLAY */}
+        <AnimatePresence>
+          {activeSubPlan && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl overflow-y-auto px-4 py-8 flex items-start justify-center"
+            >
+              <motion.div 
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 150 }}
+                className="max-w-6xl w-full bg-[#0a0a0c] border border-[#D4AF37]/35 rounded-3xl p-6 md:p-10 shadow-[0_0_80px_rgba(212,175,55,0.05)] relative overflow-hidden flex flex-col text-left"
+              >
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 via-[#D4AF37] to-blue-500" />
+                
+                {/* Closing button */}
+                <button 
+                  onClick={() => setActiveSubPlan(null)}
+                  className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:border-[#D4AF37] text-white flex items-center justify-center transition-all cursor-pointer z-20"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {/* Onboarding Header */}
+                <div className="mb-8 border-b border-white/5 pb-6">
+                  <div className="flex items-center gap-2.5 text-xs text-orange-400 font-bold uppercase tracking-widest mb-2">
+                    <Boxes className="w-4 h-4 text-[#D4AF37]" /> Active Sourcing Console
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-black text-white">Manage Your Subscription</h2>
+                  <p className="text-xs text-white/50 mt-1.5">Edit your monthly delivery, update quantities, or customize your package anytime. Autopilot shipping configured.</p>
+                </div>
+
+                {/* Main 12-Column Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  
+                  {/* Left Column (7 cols): current package items */}
+                  <div className="lg:col-span-7 space-y-6">
+                    
+                    <div className="flex justify-between items-center pb-2">
+                      <h3 className="font-extrabold text-sm text-white/80 uppercase tracking-widest">Your Current Package Items</h3>
+                      
+                      {/* Subscription health indicator */}
+                      <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono">
+                        <CheckCircle className="w-3 h-3" /> Optimized (Saving 18% vs individual shipping)
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 max-h-[460px] overflow-y-auto pr-2 scrollbar-thin">
+                      {subItems.length === 0 ? (
+                        <div className="p-12 text-center bg-white/5 border border-dashed border-white/10 rounded-2xl">
+                          <Package className="w-10 h-10 text-white/30 mx-auto mb-3" />
+                          <p className="text-xs text-white/40">No items in your package. Click Add New Item below to configure.</p>
+                        </div>
+                      ) : (
+                        subItems.map((item) => (
+                          <div 
+                            key={item.id}
+                            className="bg-[#0b0c10] border border-white/5 hover:border-white/10 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all relative overflow-hidden group"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
+                                <Package className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h4 className="font-extrabold text-sm text-white">{item.name}</h4>
+                                <p className="text-[10px] text-white/30 font-mono mt-0.5">Scale multiplier applied: x{tempQuantityScale}</p>
+                              </div>
+                            </div>
+
+                            {/* Controls */}
+                            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                              
+                              {/* Quantity controls */}
+                              <div className="flex items-center bg-black border border-white/10 rounded-lg p-1">
+                                <button 
+                                  onClick={() => {
+                                    if (item.qty <= 1) return;
+                                    setSubItems(subItems.map(si => si.id === item.id ? { ...si, qty: si.qty - 1 } : si));
+                                  }}
+                                  className="w-7 h-7 rounded bg-white/5 border border-white/10 hover:border-[#D4AF37] text-white font-bold flex items-center justify-center cursor-pointer"
+                                >
+                                  -
+                                </button>
+                                <span className="w-10 text-center text-xs font-mono font-bold text-white">
+                                  {Math.round(item.qty * tempQuantityScale)}
+                                </span>
+                                <button 
+                                  onClick={() => {
+                                    setSubItems(subItems.map(si => si.id === item.id ? { ...si, qty: si.qty + 1 } : si));
+                                  }}
+                                  className="w-7 h-7 rounded bg-white/5 border border-white/10 hover:border-[#D4AF37] text-white font-bold flex items-center justify-center cursor-pointer"
+                                >
+                                  +
+                                </button>
+                              </div>
+
+                              {/* Unit dropdown */}
+                              <select
+                                value={item.unit}
+                                onChange={(e) => {
+                                  setSubItems(subItems.map(si => si.id === item.id ? { ...si, unit: e.target.value } : si));
+                                }}
+                                className="bg-black border border-white/10 rounded-lg py-1.5 px-2 text-[10px] font-bold text-white outline-none focus:border-[#D4AF37] cursor-pointer"
+                              >
+                                <option>KG</option>
+                                <option>Liters</option>
+                                <option>Packs</option>
+                                <option>Cartons</option>
+                                <option>Pieces</option>
+                              </select>
+
+                              {/* Frequency dropdown */}
+                              <select
+                                value={item.freq}
+                                onChange={(e) => {
+                                  setSubItems(subItems.map(si => si.id === item.id ? { ...si, freq: e.target.value } : si));
+                                }}
+                                className="bg-black border border-white/10 rounded-lg py-1.5 px-2 text-[10px] font-bold text-white outline-none focus:border-[#D4AF37] cursor-pointer"
+                              >
+                                <option>Every Month</option>
+                                <option>Every 2 Months</option>
+                                <option>Quarterly</option>
+                              </select>
+
+                              {/* Inline delete confirmation prompt */}
+                              {isConfirmDeleteId === item.id ? (
+                                <div className="flex gap-1.5 items-center bg-red-650/20 border border-red-500/30 p-1 rounded-lg">
+                                  <span className="text-[9px] font-bold text-red-300 px-1">Confirm?</span>
+                                  <button 
+                                    onClick={() => {
+                                      setSubItems(subItems.filter(si => si.id !== item.id));
+                                      setIsConfirmDeleteId(null);
+                                    }}
+                                    className="px-2 py-0.5 rounded bg-red-550 text-white text-[9px] font-bold uppercase transition-colors"
+                                  >
+                                    Yes
+                                  </button>
+                                  <button 
+                                    onClick={() => setIsConfirmDeleteId(null)}
+                                    className="px-2 py-0.5 rounded bg-white/5 text-white/50 text-[9px] font-bold uppercase transition-colors"
+                                  >
+                                    No
+                                  </button>
+                                </div>
+                              ) : (
+                                <button 
+                                  onClick={() => setIsConfirmDeleteId(item.id)}
+                                  className="p-2 rounded bg-white/5 hover:bg-red-900/10 border border-white/10 hover:border-red-500/50 text-white/40 hover:text-red-400 transition-all cursor-pointer"
+                                  title="Remove item"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+
+                            </div>
+
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Add New Item triggering line */}
+                    <div className="pt-2 flex justify-between gap-4">
+                      <button 
+                        onClick={() => setIsAddItemOpen(true)}
+                        className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#D4AF37] text-white text-xs font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4 text-[#D4AF37]" /> Add New Item Sourcing
+                      </button>
+                    </div>
+
+                    {/* Searchable Add Item Popover */}
+                    <AnimatePresence>
+                      {isAddItemOpen && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="bg-[#0c0d12] border border-white/10 p-6 rounded-2xl relative space-y-4"
+                        >
+                          <button 
+                            onClick={() => setIsAddItemOpen(false)}
+                            className="absolute top-4 right-4 text-white/40 hover:text-white"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                          
+                          <h4 className="font-extrabold text-xs text-white uppercase tracking-wider">Search Sourcing Staples</h4>
+                          <div className="flex gap-2">
+                            <input 
+                              type="text" 
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder="e.g. Egusi, Yam Flour, Milo..."
+                              className="w-full bg-black border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-[#D4AF37] placeholder:text-white/20"
+                            />
+                            <button 
+                              onClick={() => {
+                                if (!searchQuery.trim()) return;
+                                const newItem = {
+                                  id: `sub-custom-${Math.floor(1000 + Math.random() * 9000)}`,
+                                  name: searchQuery,
+                                  qty: 1,
+                                  unit: "KG",
+                                  freq: "Every Month"
+                                };
+                                setSubItems([...subItems, newItem]);
+                                setSearchQuery("");
+                                setIsAddItemOpen(false);
+                              }}
+                              className="bg-[#D4AF37] hover:bg-yellow-400 text-black font-bold px-4 rounded-xl text-xs flex items-center justify-center shrink-0"
+                            >
+                              Add Custom
+                            </button>
+                          </div>
+
+                          <div className="space-y-2 pt-2">
+                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Suggested Staples:</p>
+                            <div className="flex flex-wrap gap-1.5 max-h-[100px] overflow-y-auto pr-1">
+                              {commonTraditionalStaples
+                                .filter(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+                                .map((staple, sIdx) => (
+                                  <button
+                                    key={sIdx}
+                                    onClick={() => {
+                                      const newItem = {
+                                        id: `sub-custom-${Math.floor(1000 + Math.random() * 9000)}`,
+                                        name: staple,
+                                        qty: 1,
+                                        unit: staple.includes("Oil") ? "Liters" : "KG",
+                                        freq: "Every Month"
+                                      };
+                                      setSubItems([...subItems, newItem]);
+                                      setIsAddItemOpen(false);
+                                    }}
+                                    className="text-[10px] bg-white/5 border border-white/10 hover:border-orange-500/50 text-white/80 hover:text-white py-1 px-2.5 rounded-full transition-all"
+                                  >
+                                    + {staple}
+                                  </button>
+                                ))}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                  </div>
+
+                  {/* Right Column (5 cols): Billing, Destination, Size modifiers */}
+                  <div className="lg:col-span-5 space-y-6">
+                    
+                    {/* Live Cost Estimates Card */}
+                    <div className="bg-[#0b0c10] border border-[#D4AF37]/30 p-6 rounded-3xl relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-full bg-[#D4AF37]/5 blur-2xl pointer-events-none" />
+                      
+                      <h4 className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <CreditCard className="w-3.5 h-3.5" /> LIVE BUDGET CALCULATION
+                      </h4>
+
+                      <div className="space-y-3.5 text-xs pb-4 border-b border-white/5 mb-4">
+                        <div className="flex justify-between text-white/50">
+                          <span>Sourcing Base Net:</span>
+                          <span className="font-mono text-white">${calculateSubPricing().subtotal} USD</span>
+                        </div>
+                        <div className="flex justify-between text-white/50">
+                          <span>Est. Shipping & Insurance:</span>
+                          <span className="font-mono text-white">${calculateSubPricing().shipping} USD</span>
+                        </div>
+                        <div className="flex justify-between text-emerald-400">
+                          <span>Sub Discount (20% Recurring):</span>
+                          <span className="font-mono">-${calculateSubPricing().saving} USD</span>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center text-white">
+                        <div>
+                          <p className="font-bold text-xs uppercase text-white/40 tracking-wider">MONTHLY SUB CHARGE</p>
+                          <p className="text-[9px] text-white/30 italic mt-0.5">Auto- replenishment included</p>
+                        </div>
+                        <span className="text-2xl font-black text-[#D4AF37] font-mono">
+                          ${calculateSubPricing().total} USD
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Increase package size */}
+                    <div className="bg-[#0b0c10] border border-white/5 p-5 rounded-2xl space-y-3">
+                      <p className="text-[10px] font-bold uppercase text-white/50 tracking-wider flex items-center gap-1.5">
+                        <Maximize2 className="w-3.5 h-3.5 text-[#D4AF37]" /> Increase Monthly Box Capacity:
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setTempQuantityScale(1.0)}
+                          className={`py-2 px-3 rounded-lg border text-[10px] font-bold transition-all
+                            ${tempQuantityScale === 1.0 ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37]' : 'bg-black border-transparent text-white/40'}`}
+                        >
+                          Standard (1.0x)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTempQuantityScale(1.2)}
+                          className={`py-2 px-3 rounded-lg border text-[10px] font-bold transition-all
+                            ${tempQuantityScale === 1.2 ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37]' : 'bg-black border-transparent text-white/40'}`}
+                        >
+                          +20% Size (1.2x)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTempQuantityScale(1.5)}
+                          className={`py-2 px-3 rounded-lg border text-[10px] font-bold transition-all
+                            ${tempQuantityScale === 1.5 ? 'bg-[#D4AF37]/10 border-[#D4AF37] text-[#D4AF37]' : 'bg-black border-transparent text-white/40'}`}
+                        >
+                          +50% Size (1.5x)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Delivery Destination Module */}
+                    <div className="bg-[#0b0c10] border border-white/5 p-5 rounded-2xl space-y-3">
+                      <p className="text-[10px] font-bold uppercase text-white/50 tracking-wider flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" /> Destination Management:
+                      </p>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[8px] font-bold uppercase text-white/40 mb-1">Country</label>
+                          <select
+                            value={subDestination.country}
+                            onChange={(e) => setSubDestination({ ...subDestination, country: e.target.value })}
+                            className="w-full bg-black border border-white/10 rounded-lg py-2 px-3 text-[10px] font-bold text-white outline-none focus:border-[#D4AF37] cursor-pointer"
+                          >
+                            <option>United States</option>
+                            <option>United Kingdom</option>
+                            <option>Canada</option>
+                            <option>Nigeria / Africa</option>
+                            <option>Rest of World (Custom Quote)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[8px] font-bold uppercase text-white/40 mb-1">Delivery Urgency</label>
+                          <select
+                            value={subShippingSpeed}
+                            onChange={(e) => setSubShippingSpeed(e.target.value)}
+                            className="w-full bg-black border border-white/10 rounded-lg py-2 px-3 text-[10px] font-bold text-white outline-none focus:border-[#D4AF37] cursor-pointer"
+                          >
+                            <option value="standard">Standard Consolidated</option>
+                            <option value="express">Express Air Cargo</option>
+                            <option value="priority">Priority Vacuum Sourced</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Recipient info */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <input 
+                          type="text"
+                          value={subDestination.recipient}
+                          onChange={(e) => setSubDestination({ ...subDestination, recipient: e.target.value })}
+                          placeholder="Recipient Full Name"
+                          className="w-full bg-black border border-white/10 rounded-lg py-2 px-3 text-[10px] text-white outline-none focus:border-[#D4AF37] placeholder:text-white/20"
+                        />
+                        <input 
+                          type="text"
+                          value={subDestination.phone}
+                          onChange={(e) => setSubDestination({ ...subDestination, phone: e.target.value })}
+                          placeholder="Phone Number"
+                          className="w-full bg-black border border-white/10 rounded-lg py-2 px-3 text-[10px] text-white outline-none focus:border-[#D4AF37] placeholder:text-white/20"
+                        />
+                      </div>
+                      <input 
+                        type="text"
+                        value={subDestination.address}
+                        onChange={(e) => setSubDestination({ ...subDestination, address: e.target.value })}
+                        placeholder="Street Address, City, Zip Code"
+                        className="w-full bg-black border border-white/10 rounded-lg py-2 px-3 text-[10px] text-white outline-none focus:border-[#D4AF37] placeholder:text-white/20 pt-1"
+                      />
+
+                      {/* Unsupported Country Warnings logic */}
+                      {subDestination.country.includes("Rest") && (
+                        <div className="bg-amber-500/10 border border-amber-500/35 p-3 rounded-lg flex items-start gap-2">
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                          <p className="text-[9px] text-amber-300 leading-normal">
+                            Rest of World shipping schedules require custom flight clearance codes. Standard shipping rate sifts by +$40.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Delivery scheduling and Skip Cycle */}
+                    <div className="bg-[#0b0c10] border border-white/5 p-5 rounded-2xl space-y-3">
+                      <div className="flex justify-between items-center">
+                        <p className="text-[10px] font-bold uppercase text-white/50 tracking-wider flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#D4AF37]" /> Next Delivery Schedule:
+                        </p>
+                        
+                        {/* Status tag */}
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded font-mono uppercase
+                          ${isSkipActive ? 'bg-red-500/15 text-red-400 border border-red-500/20' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'}`}>
+                          {isSkipActive ? "Paused" : "Active / Procuring"}
+                        </span>
+                      </div>
+
+                      <div className="p-3 bg-black/40 rounded-xl border border-white/5 text-[10px] space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-white/40">Next Shipping Date:</span>
+                          <span className="font-mono text-white font-bold">{isSkipActive ? "---" : subRescheduleDate}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-white/40">Est. Doorstep Arrival:</span>
+                          <span className="font-mono text-white">{isSkipActive ? "---" : "2026-06-22"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-white/40">Autopilot replenishment:</span>
+                          <span className="font-mono text-emerald-400">{autoReplenish ? "ON" : "OFF (Manual Verification)"}</span>
+                        </div>
+                      </div>
+
+                      {/* Reschedule inline date sifter */}
+                      {isRescheduleOpen && (
+                        <div className="p-3 bg-black border border-white/10 rounded-xl space-y-2 animate-fadeIn">
+                          <label className="block text-[8px] font-bold uppercase text-white/50">Choose Reschedule Shipping Date:</label>
+                          <div className="flex gap-2">
+                            <input 
+                              type="date"
+                              value={subRescheduleDate}
+                              onChange={(e) => setSubRescheduleDate(e.target.value)}
+                              className="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-[#D4AF37]"
+                            />
+                            <button 
+                              onClick={() => setIsRescheduleOpen(false)}
+                              className="bg-[#D4AF37] hover:bg-yellow-400 text-black font-bold px-3 py-1 rounded text-[10px]"
+                            >
+                              Set
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setIsRescheduleOpen(!isRescheduleOpen)}
+                          className="py-2 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-bold uppercase transition-all"
+                        >
+                          Reschedule Date
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsSkipActive(!isSkipActive)}
+                          className={`py-2 rounded border text-[10px] font-bold uppercase transition-all
+                            ${isSkipActive ? 'bg-orange-500/10 border-orange-500 text-orange-400' : 'bg-white/5 border-white/10 text-white'}`}
+                        >
+                          {isSkipActive ? "Resume Sourcing" : "Skip This Month"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Auto re-order, budget sliders and Save */}
+                    <div className="bg-[#0b0c10] border border-white/5 p-5 rounded-2xl space-y-4">
+                      
+                      {/* Auto replenishment Toggle */}
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-white/70 font-semibold">Auto-Replenish Sourcing Autopilot</span>
+                        <button
+                          type="button"
+                          onClick={() => setAutoReplenish(!autoReplenish)}
+                          className={`w-10 h-5 rounded-full p-0.5 transition-colors cursor-pointer flex
+                            ${autoReplenish ? 'bg-[#D4AF37] justify-end' : 'bg-white/10 justify-start'}`}
+                        >
+                          <span className="w-4 h-4 bg-black rounded-full" />
+                        </button>
+                      </div>
+
+                      {/* Budget Cap Slider */}
+                      <div>
+                        <div className="flex justify-between text-[10px] font-bold text-white/50 mb-1.5 uppercase tracking-wider">
+                          <span>Monthly spending Cap limit</span>
+                          <span className="text-[#D4AF37] font-mono">${subBudgetCap} USD Limit</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="150" 
+                          max="800"
+                          step="50"
+                          value={subBudgetCap} 
+                          onChange={(e) => setSubBudgetCap(parseInt(e.target.value))}
+                          className="w-full accent-[#D4AF37] bg-white/10 h-1 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Save changes CTA */}
+                      <button
+                        onClick={handleSubSave}
+                        className="w-full bg-[#D4AF37] hover:bg-yellow-400 text-black font-extrabold py-3.5 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_35px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
+                      >
+                        Save Subscription Changes <Check className="w-4 h-4" />
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                {/* Sub-confirmation Success Modal inside Overlay */}
+                <AnimatePresence>
+                  {subConfirmSuccess && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="absolute inset-0 bg-[#0a0a0c]/98 backdrop-blur z-30 flex flex-col items-center justify-center p-8 text-center"
+                    >
+                      <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 mb-6 animate-pulse">
+                        <CheckCircle className="w-8 h-8" />
+                      </div>
+                      
+                      <h3 className="text-3xl font-black text-white mb-2">Subscription Configured Successfully</h3>
+                      <p className="text-sm text-white/60 max-w-md mx-auto mb-8">
+                        Your monthly package update details have been cataloged. Sourcing concierge waybill documents are generated.
+                      </p>
+
+                      <div className="bg-[#0b0c10] border border-white/5 rounded-2xl p-6 text-left max-w-lg w-full mb-8 text-xs space-y-3 font-mono">
+                        <div className="flex justify-between"><span className="text-white/40">Plan Type:</span><span className="text-white font-bold">Family Care Package</span></div>
+                        <div className="flex justify-between"><span className="text-white/40">Status:</span><span className="text-emerald-400 font-bold uppercase">ACTIVE ON AUTOPILOT</span></div>
+                        <div className="flex justify-between"><span className="text-white/40">Recipient:</span><span className="text-white">{subDestination.recipient || "Standard Customer"}</span></div>
+                        <div className="flex justify-between"><span className="text-white/40">Destination:</span><span className="text-white">{subDestination.country}</span></div>
+                        <div className="flex justify-between"><span className="text-white/40">Next Ship Date:</span><span className="text-white">{subRescheduleDate}</span></div>
+                        <div className="flex justify-between border-t border-white/5 pt-2 font-bold text-sm text-white"><span>Estimated Monthly charge:</span><span className="text-[#D4AF37] font-mono">${calculateSubPricing().total} USD</span></div>
+                      </div>
+
+                      <div className="flex gap-4">
+                        <a 
+                          href="https://wa.me/15551234567" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition-colors flex items-center gap-1.5"
+                        >
+                          WhatsApp Sync <MessageCircle className="w-4 h-4 fill-current" />
+                        </a>
+                        <button 
+                          onClick={() => {
+                            setSubConfirmSuccess(false);
+                            setActiveSubPlan(null);
+                          }}
+                          className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer"
+                        >
+                          Close Management Console
+                        </button>
+                      </div>
+
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* Section 6: Shopping Destinations */}

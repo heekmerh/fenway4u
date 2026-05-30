@@ -3,12 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Sparkles, Calendar, ShoppingBag, Gift, Coffee, Heart, Check, 
   ArrowRight, ShieldCheck, Star, Trash2, Plus, Clock, HelpCircle, 
   Info, ChevronDown, CheckCircle, Package, Truck, Compass, 
-  UserCheck, Plane, Smile, ArrowUpRight, DollarSign
+  UserCheck, Plane, Smile, ArrowUpRight, DollarSign, X, Sliders, 
+  AlertTriangle, Search, Minus, CalendarDays, RefreshCw, Eye
 } from "lucide-react";
 
 // --- Plan Types & Data Structures ---
@@ -61,7 +62,7 @@ const foodBoxes = [
   {
     title: "Student Survival Box",
     desc: "Curated with instant noodles, traditional local snacks, Ijebu garri, sugar, and quick seasoning cubes.",
-    image: "/images/tech_gadget_sourcing.png", // using tech sourcing background but dark overlay
+    image: "/images/tech_gadget_sourcing.png",
     accent: "border-blue-500/20"
   },
   {
@@ -104,7 +105,7 @@ const lifestyleBoxes = [
 const timelineSteps = [
   { step: "01", title: "Choose Subscription Plan", desc: "Select the recurring package tier that matches your frequency and budget. Essential, Family, or Luxury Concierge." },
   { step: "02", title: "Customize Sourcing List", desc: "Pre-fill your box with your preferred grocery brands, items, and sizes inside our smart customizer console." },
-  { step: "03", title: "We Procure & Vaccum Prep", desc: "Our personal shoppers purchase items fresh from trusted local vendors, vaccum seal them, and inspect package integrity." },
+  { step: "03", title: "We Procure & Vaccum Prep", desc: "Our personal shoppers purchase items fresh from trusted local vendors, vacuum seal them, and inspect package integrity." },
   { step: "04", title: "Global Doorstep Delivery", desc: " scheduled priority air shipments complete with real-time customs tracking, delivered straight to your international address." }
 ];
 
@@ -129,14 +130,56 @@ const testimonials = [
 const faqs = [
   { q: "How do monthly subscriptions work?", a: "Once you choose a membership plan, you establish a recurring schedule (typically monthly). You fill your virtual subscription box with items. We bill automatically, procure the items fresh on your scheduled shipment day, and ship them internationally with full tracking support." },
   { q: "Can I edit my subscription list between deliveries?", a: "Absolutely. You can log into your simulated subscriber portal on this page or email/message us to customize, swap, add, or delete products up to 72 hours before your recurring packing day." },
-  { q: "How are food items packed for long journeys?", a: "All fresh and dry food items undergo high-pressure vaccum sealing. This prevents oxygen flow, preserves taste, eliminates smells, and complies with international export safety regulations." },
+  { q: "How are food items packed for long journeys?", a: "All fresh and dry food items undergo high-pressure vacuum sealing. This prevents oxygen flow, preserves taste, eliminates smells, and complies with international export safety regulations." },
   { q: "Can I pause or cancel my subscription?", a: "Yes. Sourcing memberships have zero long-term commitments. You can pause, skip, or cancel your scheduled delivery instantly from your subscriber portal or by chatting with our Telegram support." }
 ];
 
-interface GroceryRow {
+// Preloaded checklist defaults for plan subscriptions
+const DEFAULT_ITEMS_BY_PLAN: Record<string, { name: string; qty: number; unit: string; freq: string }[]> = {
+  essential: [
+    { name: "Ijebu Garri", qty: 2, unit: "KG", freq: "Every Month" },
+    { name: "Indomie Noodles", qty: 1, unit: "Cartons", freq: "Every Month" },
+    { name: "Suya Spices & Chin Chin", qty: 1, unit: "Packs", freq: "Every Month" },
+    { name: "Plantain Chips", qty: 5, unit: "Packs", freq: "Every Month" }
+  ],
+  family: [
+    { name: "Bulk White Garri", qty: 5, unit: "KG", freq: "Every Month" },
+    { name: "Family Sized Egusi & Soup Prep", qty: 2, unit: "KG", freq: "Every Month" },
+    { name: "Nsukka Palm Oil", qty: 3, unit: "Liters", freq: "Every Month" },
+    { name: "Vacuum Sealed Smoked Fish & Snails", qty: 2, unit: "KG", freq: "Every Month" }
+  ],
+  luxury: [
+    { name: "Premium Dry Foods Basket", qty: 10, unit: "KG", freq: "Every Month" },
+    { name: "Nsukka Wild Honey", qty: 2, unit: "Liters", freq: "Every Month" },
+    { name: "Gourmet Local Spice Box", qty: 3, unit: "Packs", freq: "Every Month" },
+    { name: "Kiln-Dried Smoked Catfish", qty: 3, unit: "KG", freq: "Every Month" },
+    { name: "Hand-picked Seasonal Snacks", qty: 5, unit: "Packs", freq: "Every Month" }
+  ]
+};
+
+const trendingStaples = [
+  "Ijebu Garri",
+  "White Garri",
+  "Egusi (Melon Seed)",
+  "Nsukka Palm Oil",
+  "Dried Crayfish",
+  "Yam Flour (Elubo)",
+  "Suya Seasoning Pack",
+  "Honeywell Poundo Yam",
+  "Local Smoked Catfish",
+  "Vacuum Smoked Snails",
+  "Chin Chin Snack",
+  "Plantain Chips",
+  "Indomie Noodles",
+  "Kiln-Dried Fish",
+  "Locust Beans (Iru)",
+  "Dry Ugu Leaves"
+];
+
+interface SubscriptionItem {
   id: string;
   name: string;
-  qty: string;
+  qty: number;
   unit: string;
   freq: string;
 }
@@ -144,93 +187,172 @@ interface GroceryRow {
 export default function SubscriptionsPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   
-  // Customizer State
-  const [selectedPlan, setSelectedPlan] = useState("family");
-  const [frequency, setFrequency] = useState("monthly");
-  const [destination, setDestination] = useState("United States");
-  const [shippingSpeed, setShippingSpeed] = useState("express");
+  // Dynamic Onboarding Editor Modal States
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [activePlan, setActivePlan] = useState("family");
   
-  // Custom smart grocery list state
-  const [groceryRows, setGroceryRows] = useState<GroceryRow[]>([
-    { id: "1", name: "Ijebu Garri", qty: "5", unit: "KG", freq: "Every Month" },
-    { id: "2", name: "Egusi (Melon Seed)", qty: "2", unit: "KG", freq: "Every 2 Months" },
-    { id: "3", name: "Indomie Noodles", qty: "2", unit: "Cartons", freq: "Every Month" }
-  ]);
-  const [customItem, setCustomItem] = useState("");
-  const [customQty, setCustomQty] = useState("1");
-  const [customUnit, setCustomUnit] = useState("KG");
-  const [customFreq, setCustomFreq] = useState("Every Month");
+  // Customizer state
+  const [subItems, setSubItems] = useState<SubscriptionItem[]>([]);
+  const [subDestination, setSubDestination] = useState("United States");
+  const [subCustomCountry, setSubCustomCountry] = useState("");
+  const [subShippingSpeed, setSubShippingSpeed] = useState("express");
+  const [subPackageSizer, setSubPackageSizer] = useState(1.0); // 1.0 = standard, 1.2 = +20% Large, 1.5 = +50% Jumbo
+  const [subBudgetCap, setSubBudgetCap] = useState(500);
+  const [subNextDeliveryDate, setSubNextDeliveryDate] = useState("June 15, 2026");
+  
+  // Actions states
+  const [isSkipActive, setIsSkipActive] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAddItemOpen, setIsAddItemOpen] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [subSuccessModal, setSubSuccessModal] = useState(false);
+  const [subNote, setSubNote] = useState("");
 
-  // Simulated Portal State
+  // Simulated Portal State (for page dashboard preview)
   const [isPaused, setIsPaused] = useState(false);
   const [portalStatus, setPortalStatus] = useState("Active");
   const [editSuccess, setEditSuccess] = useState(false);
 
-  // Recommendations state
-  const [recommendationDrawer, setRecommendationDrawer] = useState(false);
-  const trendingStaples = ["Palm Oil (3L)", "Dried Crayfish", "Yam Flour (Elubo)", "Suya Seasoning Pack", "Honeywell Poundo Yam", "Local Smoked Catfish", "Regional Snacks Pack"];
+  // SSR Hydration Safeguards
+  const [mounted, setMounted] = useState(false);
+  const [subscriberCode, setSubscriberCode] = useState("");
 
-  const handleAddGroceryRow = () => {
-    if (!customItem) return;
-    const newRow: GroceryRow = {
-      id: (groceryRows.length + 1).toString(),
-      name: customItem,
-      qty: customQty,
-      unit: customUnit,
-      freq: customFreq
+  useEffect(() => {
+    setMounted(true);
+    setSubscriberCode(`CONCIERGE-${Math.floor(100000 + Math.random() * 900000)}`);
+  }, []);
+
+  // Lock body scroll when overlay is open
+  useEffect(() => {
+    if (isEditorOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
     };
-    setGroceryRows([...groceryRows, newRow]);
-    setCustomItem("");
+  }, [isEditorOpen]);
+
+  // Handle plan button select - opens fullscreen onboarding customization
+  const handleSubscribeInit = (planId: string) => {
+    setActivePlan(planId);
+    
+    // Auto load items checklist matching the plan selected
+    const defaults = DEFAULT_ITEMS_BY_PLAN[planId] || DEFAULT_ITEMS_BY_PLAN.family;
+    const itemsWithIds = defaults.map((item, idx) => ({
+      id: `${planId}-${idx}-${Date.now()}`,
+      name: item.name,
+      qty: item.qty,
+      unit: item.unit,
+      freq: item.freq
+    }));
+    
+    setSubItems(itemsWithIds);
+    setIsEditorOpen(true);
   };
 
-  const handleRemoveGroceryRow = (id: string) => {
-    setGroceryRows(groceryRows.filter(row => row.id !== id));
+  // Modify quantities inside rows
+  const handleQtyChange = (itemId: string, increment: boolean) => {
+    setSubItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        const nextQty = increment ? item.qty + 1 : Math.max(1, item.qty - 1);
+        return { ...item, qty: nextQty };
+      }
+      return item;
+    }));
   };
 
-  const handleAddRecommendation = (item: string) => {
-    const newRow: GroceryRow = {
-      id: (groceryRows.length + 1).toString(),
-      name: item,
-      qty: "1",
-      unit: item.includes("Oil") ? "Liters" : "Packs",
+  // Modify unit dropdowns
+  const handleUnitChange = (itemId: string, nextUnit: string) => {
+    setSubItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        return { ...item, unit: nextUnit };
+      }
+      return item;
+    }));
+  };
+
+  // Modify custom frequencies inside row checklist
+  const handleFreqChange = (itemId: string, nextFreq: string) => {
+    setSubItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        return { ...item, freq: nextFreq };
+      }
+      return item;
+    }));
+  };
+
+  // Add Item to active checklist
+  const handleAddNewItem = (itemName: string) => {
+    if (!itemName.trim()) return;
+    const newItem: SubscriptionItem = {
+      id: `custom-item-${Date.now()}-${Math.random()}`,
+      name: itemName.trim(),
+      qty: 1,
+      unit: itemName.toLowerCase().includes("oil") || itemName.toLowerCase().includes("honey") ? "Liters" : "KG",
       freq: "Every Month"
     };
-    setGroceryRows([...groceryRows, newRow]);
+    setSubItems(prev => [...prev, newItem]);
+    setSearchQuery("");
+    setIsAddItemOpen(false);
   };
 
-  // Dynamic cost savings estimator calculations
-  const calculateBudgetEstimate = () => {
+  // Trigger inline delete bubbles
+  const handleTriggerDelete = (itemId: string) => {
+    setConfirmDeleteId(itemId);
+  };
+
+  const handleConfirmDelete = (itemId: string) => {
+    setSubItems(prev => prev.filter(item => item.id !== itemId));
+    setConfirmDeleteId(null);
+  };
+
+  // Recalculate price matrix dynamically in real-time
+  const calculateDynamicTotals = () => {
     let basePlanRate = 199;
-    if (selectedPlan === "essential") basePlanRate = 99;
-    else if (selectedPlan === "luxury") basePlanRate = 399;
+    if (activePlan === "essential") basePlanRate = 99;
+    else if (activePlan === "luxury") basePlanRate = 399;
 
-    let frequencyDiscountMultiplier = 1.0;
-    if (frequency === "bi-weekly") frequencyDiscountMultiplier = 1.8; // double packages but 10% discount
-    else if (frequency === "quarterly") frequencyDiscountMultiplier = 0.95; // 5% discount
+    // Apply package sizing multiplier (+20% / +50%)
+    const sizingRate = basePlanRate * subPackageSizer;
+    
+    // Country Validation Surcharges
+    let destinationSurcharge = 25;
+    if (subDestination === "Canada") destinationSurcharge = 35;
+    else if (subDestination === "United Kingdom") destinationSurcharge = 30;
+    else if (subDestination === "Rest of World") destinationSurcharge = 75; // Rest of world triggers alert & high fee
 
-    let shippingSurcharge = 45;
-    if (shippingSpeed === "priority") shippingSurcharge = 85;
-    else if (shippingSpeed === "standard") shippingSurcharge = 25;
+    // Shipping speeds rates
+    let shippingSpeedRate = 35; // express air
+    if (subShippingSpeed === "standard") shippingSpeedRate = 15; // standard sea
+    else if (subShippingSpeed === "priority") shippingSpeedRate = 65; // VIP direct aviation
 
-    // Surcharges for long distances
-    let destinationMultiplier = 15;
-    if (destination === "Canada") destinationMultiplier = 20;
-    else if (destination === "United Kingdom") destinationMultiplier = 10;
+    // Item count dynamic premium (reflect items scale Reactively)
+    const customItemsCount = subItems.length;
+    const itemsSourcingFee = subItems.reduce((acc, curr) => acc + (curr.qty * 3.5), 0);
 
-    const baseCost = basePlanRate * frequencyDiscountMultiplier + shippingSurcharge + destinationMultiplier;
-    const memberSaving = Math.round(baseCost * 0.20); // 20% savings guarantee
-    const subtotal = Math.round(baseCost);
-    const finalTotal = subtotal - memberSaving;
+    const subtotal = Math.round(sizingRate + destinationSurcharge + shippingSpeedRate + itemsSourcingFee);
+    const memberSaving = Math.round(subtotal * 0.20); // 20% recurring member savings guarantee
+    const total = Math.round(subtotal - memberSaving);
 
+    // If skip cycle is active, dynamic invoice total is 0, but base continues to show preview
     return {
       subtotal,
       saving: memberSaving,
-      total: finalTotal
+      shipping: destinationSurcharge + shippingSpeedRate,
+      itemsCommission: Math.round(itemsSourcingFee),
+      baseRate: Math.round(sizingRate),
+      total: isSkipActive ? 0 : total,
+      totalPreview: total
     };
   };
 
-  const estimates = calculateBudgetEstimate();
+  const currentInvoice = calculateDynamicTotals();
+  const isBudgetExceeded = currentInvoice.totalPreview > subBudgetCap;
 
+  // Handle portal simulation toggles
   const handlePortalPause = () => {
     if (isPaused) {
       setIsPaused(false);
@@ -241,33 +363,59 @@ export default function SubscriptionsPage() {
     }
   };
 
-  const handleSubscribeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const subject = encodeURIComponent(`New Personal Shopper Sourcing Subscription — ${selectedPlan.toUpperCase()}`);
-    const bodyText = `========= PERSONAL SHOPPER SUBSCRIPTION ORDER =========
-Selected Plan: ${selectedPlan.toUpperCase()}
-Billing Frequency: ${frequency.toUpperCase()}
-Shipping Destination: ${destination}
-Preferred Logistics Rate: ${shippingSpeed.toUpperCase()}
+  // Compile final selection and dispatch mailto console
+  const handleSaveSubscription = () => {
+    setIsEditorOpen(false);
+    setSubSuccessModal(true);
 
-========= DYNAMIC SUBSCRIPTION grocery list =========
-${groceryRows.map((row, idx) => {
-  return `${idx + 1}. Item: ${row.name} | Quantity: ${row.qty} ${row.unit} | Sourcing Interval: ${row.freq}`;
+    const activePlanName = plans.find(p => p.id === activePlan)?.name || "Family Care Package";
+
+    const subject = encodeURIComponent(`FENWAY4U Concierge Subscription Customizer — ${activePlanName.toUpperCase()}`);
+    const bodyText = `========= CUSTOM SUBSCRIPTION ONBOARDING RECEIPT =========
+Subscriber Reference ID: ${subscriberCode}
+Selected Plan: ${activePlanName}
+Active Billing Frequency: Monthly Autopilot
+Package Volume Scaling: ${subPackageSizer === 1.0 ? "Standard Package (1.0x Sizer)" : subPackageSizer === 1.2 ? "Large Box (+20% volume sizer)" : "Jumbo Concierge Box (+50% volume sizer)"}
+Cycle Schedule Status: ${isSkipActive ? "PAUSED (Skip next delivery active)" : "ACTIVE"}
+Next Sourcing Packaging Day: ${subNextDeliveryDate}
+
+--------- LOGISTICS & DESTINATION SHIPPING ---------
+Destination Country: ${subDestination === "Rest of World" ? subCustomCountry : subDestination}
+Preferred Transit Level: ${subShippingSpeed.toUpperCase()} (${subShippingSpeed === "priority" ? "VIP Direct Aviation" : subShippingSpeed === "express" ? "Express Air Sourced" : "Standard Consolidated Sea"})
+
+--------- DYNAMIC INVENTORIED CONCIERGE LIST ---------
+${subItems.map((item, idx) => {
+  return `${idx + 1}. Staple: ${item.name} | Qty: ${item.qty} ${item.unit} | Interval: ${item.freq}`;
 }).join("\n")}
 
-========= REAL-TIME BUDGET CALCULATION SUMMARY =========
-Sourcing Retainer Subtotal: $${estimates.subtotal} USD
-Recurring Subscriber Saving Discount (20%): -$${estimates.saving} USD
-------------------------------------------------------
-Estimated Monthly Retainer Deposit: $${estimates.total} USD
+${subNote ? `\nSubscriber Concierge Notes:\n"${subNote}"` : ""}
+
+--------- LIVE RETAINER PRICING CALCULATION ---------
+Base Plan Fee: $${currentInvoice.baseRate} USD / mo
+Logistics, Clearing & Delivery Surcharges: $${currentInvoice.shipping} USD
+Items Procurement Surcharges: $${currentInvoice.itemsCommission} USD
+Estimated Retainer Subtotal: $${currentInvoice.subtotal} USD
+20% Recurring Member Savings Guarantee: -$${currentInvoice.saving} USD
+---------------------------------------------------------
+Estimated Monthly Sourcing Invoice Retainer: $${currentInvoice.totalPreview} USD / month
+${isSkipActive ? "(Note: Next packaging cycle has been skipped. Sourcing bill is $0.00 for June cycle.)" : ""}
 
 ---
-Sent via FENWAY4U automated Concierge Sourcing Portal.
-Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 900000)}`;
+Auto-compiled on ${new Date().toLocaleDateString()} via FENWAY4U VIP Concierge Portal.`;
 
     const body = encodeURIComponent(bodyText);
-    window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
+    
+    // Automatically trigger window mailto link
+    setTimeout(() => {
+      window.open(`mailto:consult@fenway4u.com?subject=${subject}&body=${body}`, "_blank");
+    }, 2000);
   };
+
+  // FilterAutocomplete staples drawer
+  const filteredStaples = trendingStaples.filter(staple => 
+    staple.toLowerCase().includes(searchQuery.toLowerCase()) && 
+    !subItems.some(item => item.name.toLowerCase() === staple.toLowerCase())
+  );
 
   return (
     <div className="bg-[#050505] min-h-screen font-sans text-white pb-20 selection:bg-[#D4AF37] selection:text-[#050505] relative overflow-hidden">
@@ -328,7 +476,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
               className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-tight text-white"
             >
               Never Worry About <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#D4AF37] to-cyan-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#D4AF37] to-cyan-400 font-black">
                 International Shopping Again
               </span>
             </motion.h1>
@@ -351,7 +499,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
               <a href="#plans" className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-extrabold px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2 text-lg transform hover:scale-105">
                 Start Sourcing Subscription <ArrowRight className="w-5 h-5" />
               </a>
-              <a href="#customizer" className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
+              <a href="#customizer-widget" className="bg-white/5 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-2 text-lg backdrop-blur-sm group">
                 <Calendar className="w-5 h-5 text-orange-400 group-hover:scale-110 transition-transform" /> View Membership Plans
               </a>
             </motion.div>
@@ -386,7 +534,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
                 className={`bg-[#0d0d0d]/95 rounded-3xl p-8 border transition-all duration-500 flex flex-col justify-between relative ${plan.accent}`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-full border border-orange-500/30 tracking-widest animate-pulse">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-650 text-white text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-full border border-orange-500/30 tracking-widest animate-pulse">
                     {plan.badge}
                   </div>
                 )}
@@ -409,7 +557,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
                     <ul className="space-y-3">
                       {plan.items.map((item, idx) => (
                         <li key={idx} className="flex items-center gap-2.5 text-xs text-white/70">
-                          <CheckCircle className="w-4 h-4 text-orange-400 shrink-0" />
+                           <CheckCircle className="w-4 h-4 text-orange-400 shrink-0" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -430,19 +578,12 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
                     </ul>
                   </div>
 
-                  <a 
-                    href="#customizer" 
-                    onClick={() => {
-                      setSelectedPlan(plan.id);
-                      setTimeout(() => {
-                        const elem = document.getElementById("customizer");
-                        elem?.scrollIntoView({ behavior: "smooth" });
-                      }, 100);
-                    }}
+                  <button
+                    onClick={() => handleSubscribeInit(plan.id)}
                     className={`w-full py-4 px-6 rounded-xl font-extrabold text-center block transition-all text-sm uppercase tracking-wider ${plan.buttonAccent}`}
                   >
-                    Subscribe Now
-                  </a>
+                    Subscribe & Customize List
+                  </button>
                 </div>
 
               </motion.div>
@@ -464,7 +605,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-400 px-4 py-1.5 rounded-full text-xs font-extrabold uppercase backdrop-blur-md border border-orange-500/30">
                 <Heart className="w-3.5 h-3.5 fill-orange-400 animate-pulse" /> A Taste of Home — Delivered Monthly
               </div>
-              <h2 className="text-3xl md:text-5xl font-black leading-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#D4AF37] to-red-400">Fresh Staples Sourced with Nostalgic Love</h2>
+              <h2 className="text-3xl md:text-5xl font-black leading-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#D4AF37] to-red-400 font-extrabold">Fresh Staples Sourced with Nostalgic Love</h2>
               <p className="text-white/60 leading-relaxed text-sm">
                 Distance shouldn't separate you from authentic flavor. Our personal shoppers pack carefully vacuum-sealed premium African groceries and cultural essentials, Priority Air shipping them directly to your international doorstep. No stress, no local search, pure emotional comfort.
               </p>
@@ -498,7 +639,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
         </div>
       </section>
 
-      {/* RECURRING DELIVERY FEATURES */}
+      {/* RECURRING DELIVERY PRIVILEGES */}
       <section className="py-24 px-6 bg-[#050505] relative border-b border-white/5">
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="text-center mb-16">
@@ -520,283 +661,176 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
         </div>
       </section>
 
-      {/* SUBSCRIPTION CUSTOMIZATION MODULE & SMART GROCERY BUILDER */}
-      <section id="customizer" className="py-24 px-6 bg-[#090909] relative border-b border-white/5">
+      {/* ACTIVE CONCIERGE CONFIGURATOR WIDGET (ON-PAGE LIVE SIMULATOR) */}
+      <section id="customizer-widget" className="py-24 px-6 bg-[#090909] relative border-b border-white/5">
         <div className="absolute top-[40%] right-[-10%] w-[350px] h-[350px] bg-purple-950/15 rounded-full blur-[120px] pointer-events-none -z-0" />
-        <div className="container mx-auto max-w-5xl relative z-10">
+        <div className="container mx-auto max-w-4xl relative z-10">
           
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-semibold uppercase tracking-widest mb-3">
               <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Sourcing customizer console
             </div>
-            <h2 className="text-3xl md:text-5xl font-black text-white">Configure Sourcing Membership</h2>
-            <p className="text-white/50 text-sm mt-1">Choose your shipping speed, frequency, and customize your automated monthly groceries list.</p>
+            <h2 className="text-3xl md:text-5xl font-black text-white font-extrabold">Active Sourcing Calculator</h2>
+            <p className="text-white/50 text-sm mt-1">Simulate logistics and billing options to see how member discounts are automatically applied.</p>
           </div>
 
-          <form onSubmit={handleSubscribeSubmit} className="space-y-8">
-            
-            {/* Customizer Panel */}
-            <div className="bg-[#0d0d0d] border border-white/5 rounded-3xl p-6 md:p-8 space-y-6">
+          <div className="bg-[#0d0d0d] border border-white/5 rounded-3xl p-6 md:p-8 space-y-8 text-left relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-48 h-full bg-[#D4AF37]/5 blur-3xl pointer-events-none" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                {/* Plan select */}
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Concierge Plan *</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Concierge Membership Tier</label>
                   <select 
-                    value={selectedPlan}
-                    onChange={(e) => setSelectedPlan(e.target.value)}
+                    value={activePlan}
+                    onChange={(e) => setActivePlan(e.target.value)}
                     className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 text-xs text-white outline-none focus:border-[#D4AF37] transition-colors"
                   >
-                    <option value="essential">Essential Home Box</option>
-                    <option value="family">Family Care Package</option>
-                    <option value="luxury">Premium Concierge VIP</option>
+                    <option value="essential">Essential Home Box ($99/mo Base)</option>
+                    <option value="family">Family Care Package ($199/mo Base)</option>
+                    <option value="luxury">Premium Concierge VIP ($399/mo Base)</option>
                   </select>
                 </div>
 
-                {/* Frequency */}
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Delivery Interval *</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Logistics Shipping Speed</label>
                   <select 
-                    value={frequency}
-                    onChange={(e) => setFrequency(e.target.value)}
+                    value={subShippingSpeed}
+                    onChange={(e) => setSubShippingSpeed(e.target.value)}
                     className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 text-xs text-white outline-none focus:border-[#D4AF37] transition-colors"
                   >
-                    <option value="monthly">Monthly Auto Ship</option>
-                    <option value="bi-weekly">Bi-Weekly Priority</option>
-                    <option value="quarterly">Quarterly Bulk Ship</option>
+                    <option value="standard">Standard Consolidated Sea (15-30 days)</option>
+                    <option value="express">Express Priority Air (5-9 days)</option>
+                    <option value="priority">VIP Direct Aviation Cargo (2-4 days)</option>
                   </select>
                 </div>
-
-                {/* Destination */}
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Destination Country *</label>
-                  <select 
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 text-xs text-white outline-none focus:border-[#D4AF37] transition-colors"
-                  >
-                    <option>United States</option>
-                    <option>Canada</option>
-                    <option>United Kingdom</option>
-                  </select>
-                </div>
-
-                {/* Shipping Speed */}
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Logistics Timeline *</label>
-                  <select 
-                    value={shippingSpeed}
-                    onChange={(e) => setShippingSpeed(e.target.value)}
-                    className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 text-xs text-white outline-none focus:border-[#D4AF37] transition-colors"
-                  >
-                    <option value="express">Express Priority Air</option>
-                    <option value="priority">VIP Direct Aviation</option>
-                    <option value="standard">Standard Consolidated Sea</option>
-                  </select>
-                </div>
-
               </div>
 
-            </div>
-
-            {/* SMART GROCERY BUILDER */}
-            <div className="bg-[#0d0d0d] border border-white/5 rounded-3xl p-6 md:p-8 space-y-6">
-              
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">Smart Auto-Grocery List Builder:</p>
-                <button
-                  type="button"
-                  onClick={() => setRecommendationDrawer(!recommendationDrawer)}
-                  className="text-[10px] text-orange-400 font-extrabold uppercase hover:text-white transition-colors"
-                >
-                  {recommendationDrawer ? "Hide AI Staples Suggestions" : "+ Show AI Sourcing Suggestions"}
-                </button>
-              </div>
-
-              {/* Autocomplete AI recommendation drawer */}
-              <AnimatePresence>
-                {recommendationDrawer && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="bg-[#050505] p-4 border border-white/10 rounded-2xl overflow-hidden space-y-2 text-left"
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Destination Area</label>
+                  <select 
+                    value={subDestination}
+                    onChange={(e) => setSubDestination(e.target.value)}
+                    className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 text-xs text-white outline-none focus:border-[#D4AF37] transition-colors"
                   >
-                    <p className="text-[10px] uppercase font-bold text-white/40">Suggested Popular Staples (Add in 1-Click):</p>
-                    <div className="flex flex-wrap gap-2">
-                      {trendingStaples.map((staple) => (
-                        <button
-                          key={staple}
-                          type="button"
-                          onClick={() => handleAddRecommendation(staple)}
-                          className="bg-white/5 border border-white/10 hover:border-orange-500/40 text-[10px] text-white/80 hover:text-white px-2.5 py-1.5 rounded-lg transition-colors"
-                        >
-                          + {staple}
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    <option value="United States">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Rest of World">Rest of World (Surcharges Apply)</option>
+                  </select>
+                </div>
 
-              {/* Dynamic Groceries List rows */}
-              <div className="space-y-3">
-                {groceryRows.map((row, index) => (
-                  <div key={row.id} className="bg-[#050505] border border-white/5 p-4 rounded-xl flex flex-col sm:flex-row gap-4 items-center transition-all hover:border-orange-500/20">
-                    <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 w-6 h-6 rounded-full flex items-center justify-center shrink-0 border border-orange-500/20">{index + 1}</span>
-                    
-                    <div className="flex-1 w-full text-left">
-                      <span className="text-xs font-bold text-white">{row.name}</span>
-                    </div>
-
-                    <div className="w-full sm:w-auto flex gap-4 items-center justify-between sm:justify-start">
-                      <span className="text-xs text-white/60 font-mono">Qty: {row.qty} {row.unit}</span>
-                      <span className="bg-white/5 text-[9px] uppercase font-bold text-white/50 px-2 py-1 rounded tracking-wider border border-white/5 shrink-0">{row.freq}</span>
-                      <button 
-                        type="button" 
-                        onClick={() => handleRemoveGroceryRow(row.id)}
-                        className="text-white/20 hover:text-red-400 transition-colors p-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Dynamic Box Size multiplier</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button 
+                      onClick={() => setSubPackageSizer(1.0)}
+                      className={`py-2 px-3 rounded-lg text-[10px] font-bold uppercase text-center border transition-all ${subPackageSizer === 1.0 ? "bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]" : "bg-[#050505] text-white/60 border-white/5"}`}
+                    >
+                      1.0x Std
+                    </button>
+                    <button 
+                      onClick={() => setSubPackageSizer(1.2)}
+                      className={`py-2 px-3 rounded-lg text-[10px] font-bold uppercase text-center border transition-all ${subPackageSizer === 1.2 ? "bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]" : "bg-[#050505] text-white/60 border-white/5"}`}
+                    >
+                      1.2x Lrg (+20%)
+                    </button>
+                    <button 
+                      onClick={() => setSubPackageSizer(1.5)}
+                      className={`py-2 px-3 rounded-lg text-[10px] font-bold uppercase text-center border transition-all ${subPackageSizer === 1.5 ? "bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]" : "bg-[#050505] text-white/60 border-white/5"}`}
+                    >
+                      1.5x VIP (+50%)
+                    </button>
                   </div>
-                ))}
-              </div>
-
-              {/* Add Custom Grocery Item row */}
-              <div className="bg-[#050505] border border-dashed border-white/10 p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center">
-                <input 
-                  type="text" 
-                  value={customItem}
-                  onChange={(e) => setCustomItem(e.target.value)}
-                  placeholder="e.g. garri, Egusi, palm oil, plantain chips"
-                  className="flex-1 w-full bg-[#0d0d0d] border border-white/5 focus:border-[#D4AF37] rounded-xl px-3 py-2 text-xs outline-none text-white transition-colors"
-                />
-
-                <div className="w-full sm:w-auto flex gap-2 shrink-0">
-                  <input 
-                    type="number" 
-                    min="1"
-                    value={customQty}
-                    onChange={(e) => setCustomQty(e.target.value)}
-                    className="w-14 bg-[#0d0d0d] border border-white/5 rounded-xl p-2 text-xs text-white text-center outline-none"
-                  />
-                  <select 
-                    value={customUnit}
-                    onChange={(e) => setCustomUnit(e.target.value)}
-                    className="bg-[#0d0d0d] border border-white/5 rounded-xl p-2 text-xs text-white outline-none"
-                  >
-                    <option>KG</option>
-                    <option>Grams</option>
-                    <option>Liters</option>
-                    <option>Packs</option>
-                    <option>Cartons</option>
-                  </select>
-                  <select 
-                    value={customFreq}
-                    onChange={(e) => setCustomFreq(e.target.value)}
-                    className="bg-[#0d0d0d] border border-white/5 rounded-xl p-2 text-xs text-white outline-none"
-                  >
-                    <option>Every Month</option>
-                    <option>Every 2 Months</option>
-                    <option>Every Quarter</option>
-                  </select>
-                  <button
-                    type="button"
-                    onClick={handleAddGroceryRow}
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center justify-center gap-1 transition-colors shrink-0"
-                  >
-                    <Plus className="w-4 h-4" /> Add
-                  </button>
                 </div>
               </div>
 
             </div>
 
-            {/* LIVE BUDGET ESTIMATE DRAWER */}
-            <div className="bg-gradient-to-br from-[#120703] to-[#050505] border border-orange-500/20 p-6 rounded-3xl text-left shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-full bg-orange-500/5 blur-2xl pointer-events-none" />
-              
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            {/* Live Estimator Breakdown panel */}
+            <div className="bg-gradient-to-br from-[#120703] to-[#050505] border border-orange-500/20 p-5 rounded-2xl relative">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-[10px] font-extrabold uppercase text-[#D4AF37] tracking-wider flex items-center gap-1.5"><DollarSign className="w-3.5 h-3.5" /> Simulated Sourcing Total</span>
+                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold px-2 py-0.5 rounded tracking-wider">20% Savings Guarantee Applied</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-white/60 border-b border-white/5 pb-4 mb-4">
                 <div>
-                  <h4 className="text-xs font-bold text-white/50 uppercase tracking-widest flex items-center gap-1.5">
-                    <DollarSign className="w-4 h-4 text-[#D4AF37]" /> Live Smart Budget Estimator
-                  </h4>
-                  <p className="text-[10px] text-white/30 mt-0.5">Calculated in real-time with automated member savings built in.</p>
+                  <p className="text-[9px] uppercase text-white/30">Regular Retail Sourcing</p>
+                  <p className="font-extrabold text-white mt-0.5">${currentInvoice.subtotal} USD / mo</p>
                 </div>
-                <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded">
-                  20% Subscriber Saving Guaranteed
+                <div>
+                  <p className="text-[9px] uppercase text-white/30">Member Discount (20%)</p>
+                  <p className="font-extrabold text-emerald-400 mt-0.5">-$${currentInvoice.saving} USD / mo</p>
+                </div>
+                <div>
+                  <p className="text-[9px] uppercase text-white/30">Cleared Customs Transit</p>
+                  <p className="font-extrabold text-white mt-0.5">{subShippingSpeed === "priority" ? "VIP Direct Air" : subShippingSpeed === "express" ? "Express Air" : "Standard Sea"}</p>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 pb-6 mb-6 border-b border-white/5 text-xs text-white/60">
-                <div>
-                  <p className="text-[10px] uppercase text-white/30">Regular Retail Sourcing Deposit</p>
-                  <p className="font-extrabold text-white mt-1 text-sm">${estimates.subtotal} USD / mo</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase text-white/30">Automated Subscriber Discount (20%)</p>
-                  <p className="font-extrabold text-emerald-400 mt-1 text-sm">-$${estimates.saving} USD / mo</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase text-white/30">Inclusive Shipping Speed Timeline</p>
-                  <p className="font-extrabold text-white mt-1 text-sm">{shippingSpeed === "priority" ? "Express Direct Priority" : "Express Air Sourced"}</p>
-                </div>
-              </div>
-
               <div className="flex justify-between items-center text-white">
                 <div>
-                  <span className="font-bold text-sm tracking-wide">Estimated Monthly Retainer Deposit</span>
-                  <span className="text-[9px] text-white/40 block mt-0.5">All cargo clearing brokerage handling fees included</span>
+                  <p className="font-bold text-xs uppercase text-white/50 tracking-wider">Monthly Retainer Deposit</p>
+                  <p className="text-[9px] text-white/30 mt-0.5">Customs clearing & handling included</p>
                 </div>
-                <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-[#D4AF37] font-mono">
-                  ${estimates.total} USD <span className="text-xs text-white/50 font-normal">/ mo</span>
-                </span>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-[#D4AF37] font-mono">
+                    ${currentInvoice.totalPreview} USD
+                  </span>
+                  <span className="text-[10px] text-white/40 ml-1">/ month</span>
+                </div>
               </div>
             </div>
 
-            <button type="submit" className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-extrabold py-5 rounded-2xl transition-all shadow-[0_0_30px_rgba(212,175,55,0.4)] text-lg flex items-center justify-center gap-2 transform hover:scale-101">
-              <CheckCircle className="w-6 h-6 animate-pulse" /> Confirm & Start Concierge Subscription
+            <button 
+              onClick={() => handleSubscribeInit(activePlan)}
+              className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-extrabold py-4 rounded-xl transition-all shadow-[0_0_30px_rgba(212,175,55,0.3)] text-center text-sm uppercase tracking-widest flex items-center justify-center gap-2 transform hover:scale-[1.02]"
+            >
+              <Sparkles className="w-4 h-4 animate-pulse" /> Launch Advanced Concierge Checklist Sizer
             </button>
 
-          </form>
+          </div>
 
         </div>
       </section>
 
-      {/* PREMIUM ADDITIONAL SERVICES */}
+      {/* LIFESTYLE CONCIERGE SPECIALTIES */}
       <section className="py-24 px-6 bg-[#050505] relative border-b border-white/5">
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-black mb-4">Concierge <span className="text-[#D4AF37]">Lifestyle Specialties</span></h2>
-            <p className="text-white/40 text-sm max-w-lg mx-auto">Explore high-end subscription services tailored to celebrate cultural events, business operations, and wellness support.</p>
+            <p className="text-white/40 text-sm max-w-lg mx-auto">Explore high-end subscription services tailored to celebrate cultural events, business operations, study periods abroad, and family support systems.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {lifestyleBoxes.map((box, idx) => (
-              <div key={idx} className={`bg-[#0d0d0d]/80 border border-white/5 p-8 rounded-3xl transition-colors duration-300 relative group flex flex-col justify-between ${box.border}`}>
+              <div key={idx} className={`bg-[#0d0d0d]/80 border border-white/5 p-8 rounded-3xl transition-all duration-300 relative group flex flex-col justify-between ${box.border}`}>
                 <div>
-                  <box.icon className="w-8 h-8 text-[#D4AF37] mb-6" />
-                  <h3 className="font-extrabold text-lg mb-3">{box.title}</h3>
+                  <div className="w-12 h-12 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center mb-6 group-hover:border-[#D4AF37]/45 transition-colors">
+                    <box.icon className="w-6 h-6 text-[#D4AF37]" />
+                  </div>
+                  <h3 className="font-extrabold text-xl mb-3 text-white">{box.title}</h3>
                   <p className="text-white/40 text-xs leading-relaxed mb-6">{box.desc}</p>
                 </div>
-                <a href="#customizer" className="text-xs font-bold text-white/60 group-hover:text-orange-400 transition-colors flex items-center gap-1">
-                  Add to Sourcing Plan <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
-                </a>
+                <button 
+                  onClick={() => handleSubscribeInit("family")}
+                  className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#D4AF37] hover:text-white transition-colors text-left"
+                >
+                  Configure This Sourcing <ArrowUpRight className="w-4 h-4" />
+                </button>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS TIMELINE */}
+      {/* PROCESS TIMELINE */}
       <section className="py-24 px-6 bg-[#090909] relative border-b border-white/5">
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-black mb-4">Subscription <span className="text-[#D4AF37]">Timeline</span></h2>
-            <p className="text-white/40 text-sm">Four seamless steps to automated global delivery.</p>
+            <h2 className="text-3xl md:text-5xl font-black mb-4">The Subscription <span className="text-[#D4AF37]">Workflow</span></h2>
+            <p className="text-white/40 text-sm">Four clear operational phases providing absolute transparency from sourcing to delivery.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-6 relative">
@@ -804,7 +838,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
             
             {timelineSteps.map((step, idx) => (
               <div key={idx} className="relative z-10 text-center space-y-4">
-                <div className="w-14 h-14 mx-auto bg-[#050505] border-2 border-orange-500/40 rounded-xl flex items-center justify-center text-lg font-bold text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.15)] group hover:scale-105 transition-transform shrink-0">
+                <div className="w-14 h-14 mx-auto bg-[#050505] border-2 border-orange-500/40 rounded-xl flex items-center justify-center text-lg font-bold text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.15)] group hover:scale-105 transition-transform shrink-0 font-mono">
                   {step.step}
                 </div>
                 <h3 className="font-extrabold text-lg text-white">{step.title}</h3>
@@ -815,7 +849,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
         </div>
       </section>
 
-      {/* TESTIMONIALS SECTION */}
+      {/* TRUSTED BY DIASPORA FAMILIES */}
       <section className="py-24 px-6 bg-[#050505] relative border-b border-white/5">
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="text-center mb-16">
@@ -838,7 +872,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
         </div>
       </section>
 
-      {/* SUBSCRIBER MANAGEMENT INTERACTIVE PANEL */}
+      {/* SUBSCRIBER MANAGEMENT INTERACTIVE PREVIEW PANEL */}
       <section className="py-24 px-6 bg-[#090909] relative">
         <div className="container mx-auto max-w-4xl relative z-10">
           <div className="text-center mb-12">
@@ -867,7 +901,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
                   onClick={handlePortalPause}
                   className={`text-xs font-extrabold uppercase px-4 py-2.5 rounded-xl border transition-all
                     ${isPaused 
-                      ? "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent" 
+                      ? "bg-emerald-600 hover:bg-emerald-500 text-white border-transparent shadow-[0_0_15px_rgba(16,185,129,0.3)]" 
                       : "bg-[#050505] hover:bg-white/5 text-white/80 hover:text-white border-white/10"}`}
                 >
                   {isPaused ? "Resume Subscription" : "Pause Deliveries"}
@@ -922,7 +956,7 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
         </div>
       </section>
 
-      {/* Section 8: FAQ */}
+      {/* FAQ SECTION */}
       <section className="py-24 px-6 bg-[#050505] border-t border-white/5">
         <div className="container mx-auto max-w-3xl">
           <div className="text-center mb-16">
@@ -951,20 +985,587 @@ Subscriber Verification Code: CONCIERGE-${Math.floor(100000 + Math.random() * 90
       </section>
 
       {/* Sticky Subscription Bottom CTA */}
-      <div className="fixed bottom-6 left-6 right-6 z-50 bg-[#0d0d0d]/85 backdrop-blur-md border border-[#D4AF37]/30 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 max-w-5xl mx-auto shadow-2xl">
+      <div className="fixed bottom-6 left-6 right-6 z-40 bg-[#0d0d0d]/85 backdrop-blur-md border border-[#D4AF37]/30 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 max-w-5xl mx-auto shadow-2xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-orange-500/20 text-orange-400 rounded-xl flex items-center justify-center shrink-0 border border-orange-500/30">
             <Sparkles className="w-5 h-5 animate-pulse" />
           </div>
           <div className="text-left">
-            <h4 className="font-extrabold text-sm text-white">Subscribe & SkipSourcing Comissions</h4>
+            <h4 className="font-extrabold text-sm text-white">Subscribe & Skip Sourcing Commissions</h4>
             <p className="text-[10px] text-emerald-400 mt-0.5 font-bold">20% Savings Guarantee Applied Globally</p>
           </div>
         </div>
-        <a href="#customizer" className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-extrabold text-xs uppercase tracking-widest px-5 py-3 rounded-xl transition-all shadow-lg text-center shrink-0 w-full sm:w-auto">
-          Start Membership
-        </a>
+        <button
+          onClick={() => handleSubscribeInit("family")}
+          className="bg-[#D4AF37] hover:bg-[#F3C332] text-black font-extrabold text-xs uppercase tracking-widest px-5 py-3 rounded-xl transition-all shadow-lg text-center shrink-0 w-full sm:w-auto transform hover:scale-105"
+        >
+          Configure Concierge Plan
+        </button>
       </div>
+
+      {/* ========================================================================= */}
+      {/* 🚀 FULLSCREEN HIGH-FIDELITY ONBOARDING & SUBSCRIPTION EDITOR OVERLAY MODAL */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {isEditorOpen && mounted && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 overflow-y-auto bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-6"
+          >
+            <motion.div 
+              initial={{ y: 80, scale: 0.98, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 80, scale: 0.98, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="bg-[#0a0a0b] border border-[#D4AF37]/30 rounded-3xl w-full max-w-6xl overflow-hidden shadow-2xl relative flex flex-col md:grid md:grid-cols-12 min-h-[85vh] max-h-[92vh]"
+            >
+              
+              {/* Gold Top Glimmer Bar */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-[#D4AF37] to-cyan-500" />
+              
+              {/* Left Column: Cargo Customizer Checklist (8 Cols) */}
+              <div className="md:col-span-7 lg:col-span-8 p-6 md:p-8 flex flex-col justify-between overflow-y-auto max-h-[92vh] border-b md:border-b-0 md:border-r border-white/5">
+                <div>
+                  
+                  {/* Overlay Header */}
+                  <div className="flex justify-between items-start mb-6 border-b border-white/5 pb-4">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[9px] uppercase tracking-widest font-bold text-[#D4AF37]">
+                        <Sliders className="w-3 h-3 animate-spin-slow" /> Customizer Active
+                      </div>
+                      <h2 className="text-xl md:text-2xl font-black mt-2 text-white">
+                        Sizing & Staples Customizer
+                      </h2>
+                      <p className="text-white/40 text-xs mt-0.5">
+                        Customize quantities, units, and intervals for <span className="text-orange-400 font-extrabold uppercase">{plans.find(p=>p.id===activePlan)?.name}</span>.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Checklist List */}
+                  <div className="space-y-3 mb-6">
+                    <p className="text-[10px] uppercase font-extrabold text-white/50 tracking-wider flex items-center gap-2">
+                      <Package className="w-3.5 h-3.5 text-orange-400" /> Active Package Sourcing List
+                    </p>
+                    
+                    {subItems.length === 0 ? (
+                      <div className="bg-[#0f0f11] border border-dashed border-white/10 rounded-2xl p-8 text-center text-white/40 text-xs">
+                        <ShoppingBag className="w-8 h-8 mx-auto text-white/20 mb-2" />
+                        Your sourcing checklist is currently empty. Choose a plan or add items below!
+                      </div>
+                    ) : (
+                      subItems.map((item, idx) => (
+                        <motion.div 
+                          key={item.id}
+                          layout
+                          className="bg-[#0f0f11] border border-white/5 hover:border-orange-500/20 p-3.5 rounded-xl flex flex-col sm:flex-row gap-3 items-center justify-between transition-all relative overflow-hidden"
+                        >
+                          <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <span className="w-6 h-6 rounded-full bg-white/5 border border-white/10 text-white/50 text-[10px] font-bold flex items-center justify-center shrink-0">
+                              {idx + 1}
+                            </span>
+                            <span className="text-xs font-bold text-white tracking-wide">{item.name}</span>
+                          </div>
+
+                          <div className="w-full sm:w-auto flex flex-wrap gap-2.5 items-center justify-end">
+                            
+                            {/* Quantity Adjusters */}
+                            <div className="bg-[#050505] border border-white/10 rounded-lg flex items-center p-1">
+                              <button 
+                                onClick={() => handleQtyChange(item.id, false)}
+                                className="w-6 h-6 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="text-xs font-mono font-bold text-white px-2.5 min-w-[28px] text-center">
+                                {item.qty}
+                              </span>
+                              <button 
+                                onClick={() => handleQtyChange(item.id, true)}
+                                className="w-6 h-6 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            {/* Unit type select */}
+                            <select 
+                              value={item.unit}
+                              onChange={(e) => handleUnitChange(item.id, e.target.value)}
+                              className="bg-[#050505] border border-white/10 rounded-lg p-1.5 text-[10px] font-bold text-white/80 outline-none focus:border-[#D4AF37] transition-colors"
+                            >
+                              <option value="KG">KG</option>
+                              <option value="Liters">Liters</option>
+                              <option value="Packs">Packs</option>
+                              <option value="Cartons">Cartons</option>
+                              <option value="Grams">Grams</option>
+                            </select>
+
+                            {/* Frequency select */}
+                            <select 
+                              value={item.freq}
+                              onChange={(e) => handleFreqChange(item.id, e.target.value)}
+                              className="bg-[#050505] border border-white/10 rounded-lg p-1.5 text-[10px] font-bold text-white/80 outline-none focus:border-[#D4AF37] transition-colors"
+                            >
+                              <option value="Every Month">Monthly</option>
+                              <option value="Every 2 Months">Bi-Monthly</option>
+                              <option value="Every Quarter">Quarterly</option>
+                            </select>
+
+                            {/* Delete Trigger */}
+                            <button 
+                              onClick={() => handleTriggerDelete(item.id)}
+                              className="text-white/20 hover:text-red-400 p-1.5 transition-colors shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+
+                          </div>
+
+                          {/* Inline Confirmation Delete Bubble */}
+                          <AnimatePresence>
+                            {confirmDeleteId === item.id && (
+                              <motion.div 
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="absolute inset-0 bg-[#0f0f11] flex items-center justify-center gap-4 z-10 px-4"
+                              >
+                                <span className="text-[10px] uppercase font-bold text-red-400 flex items-center gap-1">
+                                  <AlertTriangle className="w-3.5 h-3.5" /> Remove {item.name}?
+                                </span>
+                                <div className="flex gap-2">
+                                  <button 
+                                    onClick={() => handleConfirmDelete(item.id)}
+                                    className="bg-red-650 hover:bg-red-500 text-white font-bold text-[9px] uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-colors"
+                                  >
+                                    Yes, Delete
+                                  </button>
+                                  <button 
+                                    onClick={() => setConfirmDeleteId(null)}
+                                    className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold text-[9px] uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-colors"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                        </motion.div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Add New Sourcing Item searchable drawer */}
+                  <div className="bg-[#0f0f11] border border-dashed border-white/10 rounded-2xl p-4 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold uppercase text-[#D4AF37] tracking-wider">
+                        Add Custom Staple Items
+                      </span>
+                      <button 
+                        onClick={() => setIsAddItemOpen(!isAddItemOpen)}
+                        className="text-[9px] font-extrabold uppercase text-orange-400 hover:text-white transition-colors"
+                      >
+                        {isAddItemOpen ? "Close Staple Tray" : "+ Browse Traditional Staples"}
+                      </button>
+                    </div>
+
+                    <div className="flex gap-2.5">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-2.5 w-4 h-4 text-white/30" />
+                        <input 
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setIsAddItemOpen(true);
+                          }}
+                          placeholder="Search or type custom grocery: Garri, Egusi, Suya spices..."
+                          className="w-full bg-[#050505] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none text-white focus:border-[#D4AF37] transition-colors"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => handleAddNewItem(searchQuery)}
+                        className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1 transition-colors"
+                      >
+                        <Plus className="w-4 h-4" /> Add Item
+                      </button>
+                    </div>
+
+                    {/* Auto-complete tray */}
+                    <AnimatePresence>
+                      {isAddItemOpen && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="bg-[#050505] border border-white/5 rounded-xl p-3 max-h-[140px] overflow-y-auto space-y-2 text-left"
+                        >
+                          <p className="text-[9px] uppercase font-bold text-white/30">Trending Staples Chips:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {filteredStaples.length === 0 ? (
+                              <p className="text-[10px] text-white/40 italic">Type to search new custom items...</p>
+                            ) : (
+                              filteredStaples.map((staple) => (
+                                <button
+                                  key={staple}
+                                  onClick={() => handleAddNewItem(staple)}
+                                  className="bg-white/5 border border-white/10 hover:border-orange-500/30 text-[9px] text-white/80 hover:text-white px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 shrink-0"
+                                >
+                                  + {staple}
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                </div>
+
+                {/* Footer notes text field inside Left column */}
+                <div className="mt-6 pt-4 border-t border-white/5">
+                  <label className="block text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2">Special Concierge Requests & Notes</label>
+                  <textarea 
+                    value={subNote}
+                    onChange={(e) => setSubNote(e.target.value)}
+                    placeholder="Specify food brands, vacuum sealing requests, or designer product details here..."
+                    rows={2}
+                    className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 text-xs outline-none focus:border-[#D4AF37] text-white transition-colors resize-none font-light"
+                  />
+                </div>
+
+              </div>
+
+              {/* Right Column: Calculations & Logistics Panel (4 Cols) */}
+              <div className="md:col-span-5 lg:col-span-4 p-6 md:p-8 bg-[#0e0e10] flex flex-col justify-between overflow-y-auto max-h-[92vh]">
+                <div className="space-y-6">
+                  
+                  {/* Header Title */}
+                  <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                    <h3 className="font-extrabold text-sm uppercase tracking-wider text-[#D4AF37]">
+                      Sourcing & Billing Specs
+                    </h3>
+                    <button 
+                      onClick={() => setIsEditorOpen(false)}
+                      className="text-white/40 hover:text-white p-1"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* 1. Destination Country */}
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-white/50 mb-2">
+                      Destination Country
+                    </label>
+                    <select 
+                      value={subDestination}
+                      onChange={(e) => setSubDestination(e.target.value)}
+                      className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 text-xs text-white outline-none focus:border-[#D4AF37] transition-colors font-bold"
+                    >
+                      <option value="United States">United States</option>
+                      <option value="Canada">Canada</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Rest of World">Rest of World (brokerage sifter fee)</option>
+                    </select>
+
+                    {/* Rest of World trigger validation alert */}
+                    {subDestination === "Rest of World" && (
+                      <div className="mt-2.5 space-y-2">
+                        <div className="bg-orange-500/10 border border-orange-500/30 p-2.5 rounded-lg text-[10px] text-orange-400 flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                          <span>Custom clearances outside USA/CAN/UK will involve specialized customs sifter surcharges.</span>
+                        </div>
+                        <input 
+                          type="text" 
+                          value={subCustomCountry}
+                          onChange={(e) => setSubCustomCountry(e.target.value)}
+                          placeholder="Type your exact shipping country..."
+                          className="w-full bg-[#050505] border border-white/5 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#D4AF37] text-white"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 2. Package Sizing multipliers */}
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-white/50 mb-2">
+                      Package Sizing scale
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => setSubPackageSizer(1.0)}
+                        className={`p-2 border rounded-xl flex flex-col items-center justify-center transition-all ${subPackageSizer === 1.0 ? "border-[#D4AF37] bg-[#D4AF37]/15 text-white" : "border-white/5 bg-[#050505] text-white/40 hover:text-white"}`}
+                      >
+                        <span className="text-xs font-bold font-mono">Standard</span>
+                        <span className="text-[8px] uppercase font-bold text-white/50 tracking-wider">1.0x Box</span>
+                      </button>
+                      <button
+                        onClick={() => setSubPackageSizer(1.2)}
+                        className={`p-2 border rounded-xl flex flex-col items-center justify-center transition-all ${subPackageSizer === 1.2 ? "border-[#D4AF37] bg-[#D4AF37]/15 text-white" : "border-white/5 bg-[#050505] text-white/40 hover:text-white"}`}
+                      >
+                        <span className="text-xs font-bold text-cyan-400 font-mono">+20% Large</span>
+                        <span className="text-[8px] uppercase font-bold text-white/50 tracking-wider">1.2x Box</span>
+                      </button>
+                      <button
+                        onClick={() => setSubPackageSizer(1.5)}
+                        className={`p-2 border rounded-xl flex flex-col items-center justify-center transition-all ${subPackageSizer === 1.5 ? "border-[#D4AF37] bg-[#D4AF37]/15 text-white" : "border-white/5 bg-[#050505] text-white/40 hover:text-white"}`}
+                      >
+                        <span className="text-xs font-bold text-orange-400 font-mono">+50% Jumbo</span>
+                        <span className="text-[8px] uppercase font-bold text-white/50 tracking-wider">1.5x Box</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 3. Delivery speed */}
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-white/50 mb-2">
+                      Logistics Speed Level
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => setSubShippingSpeed("standard")}
+                        className={`p-2.5 border rounded-xl text-[10px] font-extrabold uppercase text-center transition-all ${subShippingSpeed === "standard" ? "border-blue-400 bg-blue-500/10 text-white" : "border-white/5 bg-[#050505] text-white/40"}`}
+                      >
+                        Standard Sea
+                      </button>
+                      <button
+                        onClick={() => setSubShippingSpeed("express")}
+                        className={`p-2.5 border rounded-xl text-[10px] font-extrabold uppercase text-center transition-all ${subShippingSpeed === "express" ? "border-cyan-400 bg-cyan-500/10 text-white" : "border-white/5 bg-[#050505] text-white/40"}`}
+                      >
+                        Express Air
+                      </button>
+                      <button
+                        onClick={() => setSubShippingSpeed("priority")}
+                        className={`p-2.5 border rounded-xl text-[10px] font-extrabold uppercase text-center transition-all ${subShippingSpeed === "priority" ? "border-[#D4AF37] bg-[#D4AF37]/10 text-white" : "border-white/5 bg-[#050505] text-white/40"}`}
+                      >
+                        VIP Aviation
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 4. Scheduling & Reschedule dates */}
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-white/50 mb-2">
+                      Delivery Scheduling
+                    </label>
+                    
+                    <div className="bg-[#050505] border border-white/5 p-3.5 rounded-xl space-y-3">
+                      
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="text-[8px] uppercase font-bold text-white/40">Next Packaging Cycle</p>
+                          <p className="text-xs font-mono font-bold text-white mt-0.5">{subNextDeliveryDate}</p>
+                        </div>
+                        <button
+                          onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                          className="bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg p-2 text-xs text-white/70 hover:text-white transition-colors flex items-center gap-1 shrink-0"
+                        >
+                          <CalendarDays className="w-3.5 h-3.5 text-[#D4AF37]" /> Reschedule
+                        </button>
+                      </div>
+
+                      {/* Calendar Slot popup */}
+                      <AnimatePresence>
+                        {isCalendarOpen && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="bg-[#0c0c0e] border border-white/10 rounded-lg p-2.5 space-y-1.5 text-[10px]"
+                          >
+                            <p className="text-[8px] font-bold text-white/30 uppercase">Select Delivery Packaging Batch:</p>
+                            {["June 15, 2026", "June 30, 2026", "July 15, 2026", "July 30, 2026"].map((dateSlot) => (
+                              <button
+                                key={dateSlot}
+                                onClick={() => {
+                                  setSubNextDeliveryDate(dateSlot);
+                                  setIsCalendarOpen(false);
+                                }}
+                                className={`w-full text-left p-1.5 rounded transition-colors ${subNextDeliveryDate === dateSlot ? "bg-[#D4AF37]/20 text-[#D4AF37] font-bold" : "hover:bg-white/5 text-white/60"}`}
+                              >
+                                {dateSlot} (cleared air space batch)
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Skip Next Delivery Cycle slider/switch */}
+                      <div className="flex justify-between items-center border-t border-white/5 pt-3">
+                        <div>
+                          <p className="text-[9px] font-bold text-white">Skip Next Cycle</p>
+                          <p className="text-[8px] text-white/40">Pause this cycle, resume next month</p>
+                        </div>
+                        <button
+                          onClick={() => setIsSkipActive(!isSkipActive)}
+                          className={`w-11 h-6 rounded-full p-1 transition-colors outline-none shrink-0 ${isSkipActive ? "bg-orange-500" : "bg-white/10"}`}
+                        >
+                          <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isSkipActive ? "translate-x-5" : "translate-x-0"}`} />
+                        </button>
+                      </div>
+
+                      {isSkipActive && (
+                        <div className="bg-red-950/20 border border-red-500/20 p-2.5 rounded-lg text-[9px] text-orange-400 mt-2 text-center font-bold">
+                          📅 June packaging batch paused. Next auto-shipments will resume on July 15. Sourcing retainer invoice is $0.00.
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+
+                  {/* 5. Spending Caps Slider */}
+                  <div>
+                    <div className="flex justify-between text-[9px] uppercase tracking-wider font-bold text-white/50 mb-2">
+                      <span>Maximum Sourcing Cap</span>
+                      <span className="text-[#D4AF37] font-mono">${subBudgetCap} USD</span>
+                    </div>
+                    <input 
+                      type="range"
+                      min="100"
+                      max="1000"
+                      step="50"
+                      value={subBudgetCap}
+                      onChange={(e) => setSubBudgetCap(Number(e.target.value))}
+                      className="w-full h-1.5 bg-[#050505] rounded-lg appearance-none cursor-pointer accent-[#D4AF37] outline-none"
+                    />
+
+                    {/* Flashing Over-budget warning banner */}
+                    {isBudgetExceeded && !isSkipActive && (
+                      <div className="mt-2.5 bg-red-950/20 border border-red-500/30 p-2.5 rounded-lg text-[10px] text-red-400 flex items-center gap-1.5 animate-pulse">
+                        <AlertTriangle className="w-4 h-4 shrink-0" />
+                        <span>Est. total exceeds maximum spending cap! Reduce checklist items or box sizer levels.</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 6. Dynamic Invoice Summary box */}
+                  <div className="bg-[#050505] border border-white/5 rounded-2xl p-4 space-y-2.5 text-xs text-left relative overflow-hidden">
+                    
+                    <p className="text-[10px] font-black uppercase tracking-wider text-[#D4AF37] border-b border-white/5 pb-2">
+                      CONCIERGE INVOICE SUMMARY
+                    </p>
+
+                    <div className="flex justify-between text-[11px] text-white/50 pt-1">
+                      <span>Base Plan Fee ({activePlan})</span>
+                      <span className="font-mono">${currentInvoice.baseRate}.00</span>
+                    </div>
+
+                    {currentInvoice.itemsCommission > 0 && (
+                      <div className="flex justify-between text-[11px] text-white/50">
+                        <span>Checklist staples sourcing</span>
+                        <span className="font-mono">+${currentInvoice.itemsCommission}.00</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between text-[11px] text-white/50">
+                      <span>Custom clearances + Logistics</span>
+                      <span className="font-mono">+${currentInvoice.shipping}.00</span>
+                    </div>
+
+                    <div className="flex justify-between text-[11px] text-white/50">
+                      <span>Subtotal Sourcing Deposit</span>
+                      <span className="font-mono">${currentInvoice.subtotal}.00</span>
+                    </div>
+
+                    <div className="flex justify-between text-[11px] text-emerald-400 border-b border-white/5 pb-2.5">
+                      <span>20% Subscriber Discount</span>
+                      <span className="font-mono">-${currentInvoice.saving}.00</span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-white pt-1">
+                      <div>
+                        <span className="font-extrabold text-sm tracking-wide block">Retainer Total</span>
+                        <span className="text-[8px] text-white/30">All clearance brokerage fees pre-paid</span>
+                      </div>
+                      <span className="text-xl font-mono font-black text-[#D4AF37]">
+                        ${isSkipActive ? "0" : currentInvoice.totalPreview}.00 USD
+                      </span>
+                    </div>
+
+                  </div>
+
+                </div>
+
+                {/* Subscriptions CTA Save Button */}
+                <div className="mt-8">
+                  <button 
+                    onClick={handleSaveSubscription}
+                    disabled={isBudgetExceeded && !isSkipActive}
+                    className={`w-full py-4.5 rounded-2xl font-extrabold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-2xl
+                      ${(isBudgetExceeded && !isSkipActive)
+                        ? "bg-white/5 border border-white/10 text-white/30 cursor-not-allowed" 
+                        : "bg-[#D4AF37] hover:bg-[#F3C332] text-black shadow-[0_0_30px_rgba(212,175,55,0.4)] transform hover:scale-[1.02]"
+                      }`}
+                  >
+                    <CheckCircle className="w-5 h-5" /> Confirm & Start Concierge
+                  </button>
+                </div>
+
+              </div>
+
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ========================================================================= */}
+      {/* 🚀 POST-SUBMISSION SUCCESS MODAL WINDOW OVERLAY */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {subSuccessModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 30 }}
+              className="bg-[#0d0d0e] border border-[#D4AF37]/40 p-8 rounded-3xl max-w-lg text-center shadow-[0_0_80px_rgba(212,175,55,0.15)] relative overflow-hidden"
+            >
+              
+              <div className="absolute right-[-10%] top-[-10%] w-48 h-48 bg-[#D4AF37]/5 blur-3xl rounded-full pointer-events-none" />
+
+              <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6 text-emerald-400">
+                <CheckCircle className="w-10 h-10 animate-bounce" />
+              </div>
+
+              <h2 className="text-2xl md:text-3xl font-black mb-3">Subscription Saved & Synced!</h2>
+              <p className="text-white/60 text-xs leading-relaxed max-w-sm mx-auto mb-6">
+                Your customizable sourcing list has been successfully synced with the logistics database. We have compiled a pre-structured Concierge Cargo order document and are launching your default email console now.
+              </p>
+
+              <div className="bg-[#050505] border border-white/5 p-4.5 rounded-2xl mb-8 text-left text-xs font-mono space-y-2">
+                <p className="text-[#D4AF37] font-bold">Verification ID: {subscriberCode}</p>
+                <p className="text-white/50">Recipient Target: consult@fenway4u.com</p>
+                <p className="text-white/50">Billing Base: ${currentInvoice.totalPreview} USD / month</p>
+                <p className="text-white/50">Next packaging cycle: {subNextDeliveryDate}</p>
+              </div>
+
+              <div className="space-y-3">
+                <button 
+                  onClick={() => setSubSuccessModal(false)}
+                  className="w-full bg-[#D4AF37] hover:bg-[#F3C332] text-black font-extrabold py-4 rounded-xl shadow-lg transition-colors text-xs uppercase tracking-widest"
+                >
+                  Return to Dashboard Portal
+                </button>
+                <p className="text-[10px] text-white/30 italic">
+                  Didn't see your email console launch? Tap the button to retry.
+                </p>
+              </div>
+
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

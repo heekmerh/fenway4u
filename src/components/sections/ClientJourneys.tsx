@@ -75,7 +75,7 @@ export function ClientJourneys() {
       destination: "Accra, Ghana ➔ London, United Kingdom",
       storyQuote: "I never have to worry about sourcing genuine garri, fresh egusi, or local palm oil. It arrives vacuum-sealed, perfectly preserved.",
       description: "Chinedu is a postgraduate student at a UK university who missed authentic home-cooked meals. We enrolled him in our monthly grocery box subscription, handling phytosanitary inspections and priority shipping.",
-      image: "/images/african_groceries_banner_1779859365837.png",
+      image: "/images/african_groceries_banner.png",
       timeline: [
         { step: "Custom Box Pack", desc: "Student selected egusi, yams, dry fish, and spices in custom quantities", date: "Day 1" },
         { step: "Vacuum Seal", desc: "Double-layered heat packing to guarantee standard freshness borders", date: "Day 2" },
@@ -98,7 +98,7 @@ export function ClientJourneys() {
       destination: "Lagos, Nigeria ➔ Houston, Texas (USA)",
       storyQuote: "Fenway4u is my strategic B2B partner. They consolidated shipments from 4 weavers in Kano and shipped a full ocean container with complete customs clearances.",
       description: "Amina runs an African-inspired luxury boutique in Texas. We verify Kano and Lagos weavers, consolidate bulk rolls, handle export clearances, and manage container shipping directly to her warehouse.",
-      image: "/images/luxury_fashion_sourcing_1779859381384.png",
+      image: "/images/luxury_fashion_sourcing.png",
       timeline: [
         { step: "Factory Vetting", desc: "Physically audited weaving compounds in Kano to check material volume", date: "Month 1" },
         { step: "Warehouse Pack", desc: "Palletized, labeled, and container-packed rolls at Lagos shipping yard", date: "Month 2" },

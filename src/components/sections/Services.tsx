@@ -7,14 +7,14 @@ import Link from "next/link";
 const services = [
   { icon: GraduationCap, title: "Study Visa Assistance", desc: "Expert guidance for international students.", href: "/study-visa" },
   { icon: Briefcase, title: "Work Permit Guidance", desc: "Seamless corporate and individual work visas.", href: "/work-permit" },
-  { icon: Home, title: "Relocation Support", desc: "End-to-end family and business relocation.", href: "/relocation-support" },
-  { icon: Car, title: "Car Shipping", desc: "Secure international vehicle transport.", href: "/car-shipping" },
-  { icon: Smartphone, title: "Electronics Shipping", desc: "Safe handling of delicate electronics.", href: "/electronics-shipping" },
+  { icon: Home, title: "Relocation and Visit Visa Support", desc: "End-to-end family and business relocation.", href: "/relocation-support" },
+  { icon: Car, title: "Car Purchase & Shipping", desc: "Secure international vehicle transport.", href: "/car-shipping" },
+  { icon: Smartphone, title: "Electronics Purchase & Shipping", desc: "Safe handling of delicate electronics.", href: "/electronics-shipping" },
   { icon: Plane, title: "Air Freight", desc: "Fastest delivery for urgent cargo.", href: "/air-freight" },
   { icon: Ship, title: "Sea Freight", desc: "Cost-effective bulk shipping solutions.", href: "/sea-freight" },
   { icon: ShieldAlert, title: "Customs Clearance", desc: "Hassle-free customs brokerage.", href: "/customs-clearance" },
   { icon: ShoppingBag, title: "Shop For Me Service", desc: "We buy and ship products for you globally.", href: "/shop-for-me" },
-  { icon: Warehouse, title: "International Storage", desc: "Secure package holding & consolidation hubs.", href: "/storage" },
+  { icon: Warehouse, title: "International & Local Storage", desc: "Secure package holding & consolidation hubs.", href: "/storage" },
 ];
 
 export function Services() {

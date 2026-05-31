@@ -162,14 +162,7 @@ export function FinalCTA() {
               <Shield className="w-5 h-5 text-green-400" />
               <div className="text-left">
                 <p className="text-xs text-white/40 font-semibold uppercase tracking-wider">Global Support</p>
-                <div className="flex items-center gap-1.5 text-xs text-white/80 font-bold mt-0.5">
-                  <span title="English">🇬🇧 EN</span> · 
-                  <span title="French">🇫🇷 FR</span> · 
-                  <span title="Spanish">🇪🇸 ES</span> · 
-                  <span title="German">🇩🇪 DE</span> · 
-                  <span title="Chinese">🇨🇳 ZH</span> · 
-                  <span title="Arabic">🇦🇪 AR</span>
-                </div>
+                <p className="text-sm font-bold text-white mt-0.5">🇬🇧 English Only</p>
               </div>
             </div>
           </div>

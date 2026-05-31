@@ -284,9 +284,12 @@ export default function StudyVisaPage() {
                   </div>
                 </div>
                 
-                <Link href="#" className="w-full block text-center bg-white/5 hover:bg-[#D4AF37] hover:text-[#0B132B] border border-white/10 hover:border-transparent py-3 rounded-xl font-bold transition-all">
+                <button 
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))}
+                  className="w-full block text-center bg-white/5 hover:bg-[#D4AF37] hover:text-[#0B132B] border border-white/10 hover:border-transparent py-3 rounded-xl font-bold transition-all cursor-pointer"
+                >
                   Learn More
-                </Link>
+                </button>
               </motion.div>
             ))}
           </div>

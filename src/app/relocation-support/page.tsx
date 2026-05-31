@@ -34,7 +34,9 @@ const visaSupport = [
 const destinations = [
   { name: "Canada", desc: "Visitor visa pathways, relocation support, and multicultural lifestyle guidance.", flag: "🇨🇦" },
   { name: "United Kingdom", desc: "Tourist visits, family reunification, and business travel opportunities.", flag: "🇬🇧" },
-  { name: "United States", desc: "Tourism, business visits, and unmatched travel experiences.", flag: "🇺🇸" }
+  { name: "United States", desc: "Tourism, business visits, and unmatched travel experiences.", flag: "🇺🇸" },
+  { name: "Europe", desc: "Schengen tourist visas, business travel, and diverse European routes.", flag: "🇪🇺" },
+  { name: "All African Countries", desc: "Inter-continental visitor visas, local tourism, and regional African trade travel.", flag: "🌍" }
 ];
 
 const relocationServices = [
@@ -287,9 +289,11 @@ Thank you.`;
                 <div className="relative z-10 flex flex-col h-full">
                   <h3 className="font-bold text-2xl mb-4 text-white group-hover:text-blue-400 transition-colors">{dest.name}</h3>
                   <p className="text-sm text-white/60 leading-relaxed mb-8 flex-grow">{dest.desc}</p>
-                  <button className="text-sm font-bold text-blue-400 flex items-center gap-2 group-hover:gap-3 transition-all">
-                    Explore {dest.name} Visas <ArrowRight className="w-4 h-4" />
-                  </button>
+                  {dest.name !== "Europe" && dest.name !== "All African Countries" && (
+                    <button className="text-sm font-bold text-blue-400 flex items-center gap-2 group-hover:gap-3 transition-all">
+                      Explore {dest.name} Visas <ArrowRight className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

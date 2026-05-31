@@ -62,9 +62,12 @@ export function Services() {
               <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
               <p className="text-white/60 mb-6 line-clamp-2">{service.desc}</p>
               
-              <Link href={service.href} className="inline-flex items-center text-sm font-bold text-[#D4AF37] group-hover:text-[#F3C332]">
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent("open-contact-modal"))}
+                className="inline-flex items-center text-sm font-bold text-[#D4AF37] group-hover:text-[#F3C332] bg-transparent border-none outline-none cursor-pointer"
+              >
                 Learn more <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </button>
             </motion.div>
           ))}
         </div>

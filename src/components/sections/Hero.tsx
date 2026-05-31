@@ -2,8 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight, PackageSearch, PlaneTakeoff } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export function Hero() {
   return (
@@ -59,14 +58,6 @@ export function Hero() {
               Start Your Journey
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-            
-            <Link 
-              href="#quote" 
-              className="flex items-center justify-center gap-2.5 px-8 py-4 bg-white/5 text-white font-extrabold rounded-xl hover:bg-white/10 transition-all border border-white/10 uppercase text-xs tracking-wider w-full sm:w-auto text-center"
-            >
-              <PlaneTakeoff className="w-4 h-4 text-[#D4AF37]" />
-              Estimate Route Costs
-            </Link>
           </div>
         </motion.div>
       </div>

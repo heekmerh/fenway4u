@@ -288,12 +288,7 @@ Thank you.`;
                 </div>
                 <div className="relative z-10 flex flex-col h-full">
                   <h3 className="font-bold text-2xl mb-4 text-white group-hover:text-blue-400 transition-colors">{dest.name}</h3>
-                  <p className="text-sm text-white/60 leading-relaxed mb-8 flex-grow">{dest.desc}</p>
-                  {dest.name !== "Europe" && dest.name !== "All African Countries" && (
-                    <button className="text-sm font-bold text-blue-400 flex items-center gap-2 group-hover:gap-3 transition-all">
-                      Explore {dest.name} Visas <ArrowRight className="w-4 h-4" />
-                    </button>
-                  )}
+                  <p className="text-sm text-white/60 leading-relaxed mb-0 flex-grow">{dest.desc}</p>
                 </div>
               </div>
             ))}
